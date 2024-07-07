@@ -22,8 +22,8 @@ responses from the arXiv API.
    ```
 
 # Usage
-To retrieve the most recent computer science papers, use the `arxiv_retriever` command followed by the categories and 
-optional parameters:
+To retrieve the most recent computer science papers by category, use the `fetch` command followed by the categories and/or 
+options:
    ```shell
    arxiv_retriever fetch <categories> [--limit]
    ```
