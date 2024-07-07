@@ -23,16 +23,29 @@ responses from the arXiv API.
    ```
 
 # Usage
-To retrieve the most recent computer science papers, use the `arxiv_retriever` command followed by the categories and 
-optional parameters:
+To retrieve the most recent computer science papers by categories, use the `fetch` command followed by the categories and 
+options:
    ```shell
    arxiv_retriever fetch <categories> [--limit]
    ```
+*Outputs `limit` papers sorted by `submittedDate` in descending order*
 
-# Example
+To retrieve `limit` papers matching a specified title, use the `search` command followed by a title and options:
+   ```shell
+   arxiv_retriever search <title> [--limit]
+   ```
+*Outputs `limit` papers sorted by `relevance` in descending order*
+
+
+## Example
 Fetch the latest 5 papers in the cs.AI and cs.GL:
    ```shell
    arxiv_retriever fetch cs.AI cs.GL --limit 5
+   ```
+
+Fetch papers matching the title, "Attention is all you need":
+   ```shell
+   arxiv_retriever search "Attention is all you need" --limit 5
    ```
 
 # Contributing
