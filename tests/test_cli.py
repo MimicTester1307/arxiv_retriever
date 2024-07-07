@@ -21,9 +21,6 @@ def test_fetch_command_success(runner, mocker):
         }
     ]
     result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1"])
-    print(f"Mock called: {mock_fetch.called}")
-    print(f"Mock call args: {mock_fetch.call_args}")
-    print(f"Result: {result.stdout}")
     assert result.exit_code == 0
     assert "Test Paper" in result.stdout
     assert "John Doe" in result.stdout
