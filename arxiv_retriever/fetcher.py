@@ -1,6 +1,7 @@
 import requests
 from typing import List, Dict
-import xml.etree.ElementTree as ET  # TODO: explore way to parse XML more securely
+import xml.etree.ElementTree as ET  # TODO: explore way to parse XML data more securely
+import urllib.parse
 
 
 def fetch_papers(categories: List[str], limit: int) -> List[Dict]:
@@ -13,6 +14,20 @@ def fetch_papers(categories: List[str], limit: int) -> List[Dict]:
         return parse_arxiv_response(response.text)
     else:
         raise Exception(f"Failed to fetch papers: HTTP {response.status_code}")
+
+
+# TODO: add optional author parameter to refine title search by author
+def search_paper_by_title(title: str, limit: int) -> List[Dict]:
+    """Fetch papers from ArXiv API based on given title."""
+    base_url = "http://export.arxiv.org/api/query?"
+    encoded_title = urllib.parse.quote_plus(title)
+    query = f"search_query=ti:{encoded_title}&sortBy=relevance&sortOrder=descending&max_results={limit}"
+
+    response = requests.get(base_url + query)
+    if response.status_code == 200:
+        return parse_arxiv_response(response.text)
+    else:
+        raise Exception(f"Failed to search papers: HTTP {response.status_code}")
 
 
 def parse_arxiv_response(xml_data: str) -> List[Dict]:
