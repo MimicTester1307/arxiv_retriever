@@ -5,8 +5,9 @@ and leverages the Typer library for the command-line interface and the Python El
 responses from the arXiv API.
 
 # Features
-- Fetches the most recent papers from [arxiv.org](https://arxiv.org/) in specified categories.
-- Displays paper details including title, authors, publication date, and link
+- Fetches the most recent papers from ArXiv by specified categories
+- Fetches papers from ArXiv by title
+- Displays paper details including title, authors, publication date, and link to paper's page
 - Easy-to-use command-line interface built with Typer
 - Configurable number of results to fetch
 
