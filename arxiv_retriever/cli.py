@@ -1,6 +1,6 @@
 import typer
 from typing_extensions import Annotated
-from fetcher import fetch_papers, search_paper_by_title
+from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title
 
 app = typer.Typer(no_args_is_help=True)
 
