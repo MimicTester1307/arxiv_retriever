@@ -1,15 +1,22 @@
 # Description
-`arxiv_retriever` is a command-line tool designed to automatically retrieve the most recent computer science papers from
-[arxiv.org](https://arxiv.org/) based on categories specified as command-line arguments. This tool is built using Python
-and leverages the Typer library for the command-line interface and the Python ElementTree XML package for parsing XML 
-responses from the arXiv API.
+`arxiv_retriever` is a lightweight command-line tool designed to automate the retrieval of computer science papers from
+[ArXiv](https://arxiv.org/). The retrieval can be done using specified ArXiv computer science archive categories or 
+using the full or partial title of a specific paper, if you have that.
 
-# Features
+This tool is built using Python and leverages the Typer library for the command-line interface and the Python ElementTree
+XML package for parsing XML responses from the arXiv API. It can be useful for researchers, engineers, or students who
+want to quickly retrieve an ArXiv paper or keep abreast of latest research in their field without leaving their
+terminal/workstation.
+
+Although the current focus is on the computer science archive, it can be easily adapted to other areas.
+
+# Features [more coming soon--see Notion page below for more info]
 - Fetches the most recent papers from ArXiv by specified categories
 - Fetches papers from ArXiv by title
 - Displays paper details including title, authors, publication date, and link to paper's page
 - Easy-to-use command-line interface built with Typer
 - Configurable number of results to fetch
+- Built using only the standard library and tried and tested packages.
 
 # Installation
 1. Clone the repository:
@@ -59,4 +66,5 @@ This project is licensed under the MIT license. See the LICENSE file for more de
 - [Typer](https://typer.tiangolo.com/) for the command-line interface
 - [ElementTree](https://docs.python.org/3/library/xml.etree.elementtree.html) for XML parsing
 - [arXiv API](https://info.arxiv.org/help/api/basics.html) for providing access to paper metadata
-- [Notion](https://clover-gymnast-aeb.notion.site/ArXiv-Retriever-630d06d96edf4bfea17248cc890c021e?pvs=4) for helping me track and document my progress and learning.
+- [Notion](https://clover-gymnast-aeb.notion.site/ArXiv-Retriever-630d06d96edf4bfea17248cc890c021e?pvs=4) for helping me 
+  track my progress and document my learning.
