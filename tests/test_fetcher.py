@@ -1,5 +1,19 @@
 from typing import List, Dict
+
 from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title, parse_arxiv_response
+
+from pytest_mock import MockerFixture
+import pytest
+
+
+@pytest.fixture
+def mock_requests(mocker: MockerFixture):
+    return mocker.patch('arxiv_retriever.fetcher.requests.get')
+
+
+@pytest.fixture
+def mock_parse_arxiv_response(mocker: MockerFixture):
+    return mocker.patch('arxiv_retriever.fetcher.parse_arxiv_response')
 
 
 def test_parse_arxiv_response():
@@ -35,8 +49,28 @@ def test_parse_arxiv_response():
     assert result[0]['link'] == 'http://arxiv.org/abs/hep-ex/0307015'
 
 
-def test_fetch_papers_success():
-    pass
+def test_fetch_papers_success(mock_requests, mock_parse_arxiv_response, mocker: MockerFixture):
+    """Test fetch_papers function."""
+    # Arrange
+    categories = ['cs.AI', 'math.CO']
+    limit = 5
+    expected_url = ("http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+math.CO&sortBy=submittedDate"
+                    "&sortOrder=descending&max_results=5")
+    mock_response = mocker.Mock()
+    mock_response.status_code = 200
+    mock_response.text = '<fake_xml>Fake ArXiv response</fake_xml>'
+    mock_requests.return_value = mock_response
+
+    expected_parsed_result = [{'title': 'Test paper', 'authors': ['John Doe']}]
+    mock_parse_arxiv_response.return_value = expected_parsed_result
+
+    # Act
+    result = fetch_papers(categories, limit)
+
+    # Assert
+    mock_requests.assert_called_once_with(expected_url)
+    mock_parse_arxiv_response(mock_response.text)
+    assert result == expected_parsed_result
 
 
 def test_search_paper_by_title_success():
