@@ -8,7 +8,8 @@ XML package for parsing XML responses from the arXiv API. It can be useful for r
 want to quickly retrieve an ArXiv paper or keep abreast of latest research in their field without leaving their
 terminal/workstation.
 
-Although the current focus is on the computer science archive, it can be easily adapted to other areas.
+Although my current focus while building `arxiv_retriever` has been on the computer science archive, it can be easily 
+used with categories from other areas on arxiv.
 
 # Features [more coming soon--see Notion page below for more info]
 - Fetches the most recent papers from ArXiv by specified categories
