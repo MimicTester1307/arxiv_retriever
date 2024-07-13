@@ -1,6 +1,7 @@
 import typer
 from typing_extensions import Annotated
 from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title
+from arxiv_retriever.utils import extract_paper_metadata
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -13,13 +14,7 @@ def fetch(categories: Annotated[list[str], typer.Argument(help="ArXiv categories
     typer.echo(f"Fetching up to {limit} papers from categories: {', '.join(categories)}...")
     try:
         papers = fetch_papers(categories, limit)
-        for i, paper in enumerate(papers, 1):
-            typer.echo(f"\n{i}. {paper['title']}")
-            typer.echo(f"    Authors: {', '.join(paper['authors'])}")
-            typer.echo(f"    Published: {paper['published']}")
-            typer.echo(f"    Link: {paper['link']}")
-            typer.echo(
-                f"    Summary: {paper['summary'][:100]}...")  # truncate summary # TODO: possibly update to find index of first period character in summary then use for truncation. makes summary more complete.
+        extract_paper_metadata(papers)
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
 
@@ -34,12 +29,7 @@ def search(
 
     try:
         papers = search_paper_by_title(title, limit)
-        for i, paper in enumerate(papers, 1):  # TODO: extract this into helper function to eliminate duplicate
-            typer.echo(f"\n{i}. {paper['title']}")
-            typer.echo(f"    Authors: {', '.join(paper['authors'])}")
-            typer.echo(f"    Published: {paper['published']}")
-            typer.echo(f"    Link: {paper['link']}")
-            typer.echo(f"    Summary: {paper['summary'][:100]}...")
+        extract_paper_metadata(papers)
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
 
