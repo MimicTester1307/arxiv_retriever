@@ -3,6 +3,7 @@ import typer
 
 
 def extract_paper_metadata(papers: List[Dict]):
+    """Extract metadata from papers in paper list."""
     for i, paper in enumerate(papers, 1):
         typer.echo(f"\n{i}. {paper['title']}")
         typer.echo(f"    Authors: {', '.join(paper['authors'])}")
