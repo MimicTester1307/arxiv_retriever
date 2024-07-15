@@ -67,5 +67,6 @@ This project is licensed under the MIT license. See the LICENSE file for more de
 - [Typer](https://typer.tiangolo.com/) for the command-line interface
 - [ElementTree](https://docs.python.org/3/library/xml.etree.elementtree.html) for XML parsing
 - [arXiv API](https://info.arxiv.org/help/api/basics.html) for providing access to paper metadata
+- [Anthropic API](https://www.anthropic.com/api) for the paper summarization functionality
 - [Notion](https://clover-gymnast-aeb.notion.site/ArXiv-Retriever-630d06d96edf4bfea17248cc890c021e?pvs=4) for helping me 
   track my progress and document my learning.
