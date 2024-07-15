@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "arxiv-retriever"
 version = "0.1.0"
-description = "\"Automate your ArXiv paper search and retrieval process.\""
+description = "\"Automate your ArXiv paper search, retrieval, and summarization process.\""
 authors = ["Excel Chukwu <excel.chukwu1.0@gmail.com>"]
 license = "MIT"
 readme = "README.md"
@@ -9,9 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.8"
 typer = ">=0.12.3"
-pytest = ">=8.2.2"
 requests = ">=2.32.3"
-pytest-mock = ">=3.14.0"
 certifi = ">=2024.7.4"
 charset-normalizer = ">=3.3.2"
 click = ">=8.1.7"
@@ -26,7 +24,12 @@ rich = ">=13.7.1"
 shellingham = ">=1.5.4"
 typing-extensions = ">=4.12.2"
 urllib3 = ">=2.2.2"
+anthropic = "^0.31.1"
+python-dotenv = "^1.0.1"
 
+[tool.poetry.group.test.dependencies]
+pytest = ">=8.2.2"
+pytest-mock = ">=3.14.0"
 
 [build-system]
 requires = ["poetry-core"]
