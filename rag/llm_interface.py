@@ -15,8 +15,7 @@ def get_llm_response(prompt: str) -> str:
         max_tokens=1024,
         temperature=0,
         system="You are a helpful AI assistant specializing in summarizing scientific papers, extracting the most "
-               "meaningful parts of the paper. You can also suggest future research directions that is grounded in "
-               "factual and currently available research.",
+               "meaningful parts of the paper.",
         messages=[
             {"role": "user", "content": prompt}
         ]
