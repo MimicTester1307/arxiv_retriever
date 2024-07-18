@@ -8,7 +8,7 @@ load_dotenv()
 
 
 def get_llm_response(prompt: str) -> str:
-    """Prompt Claude 3.4 Sonnet for a response"""
+    """Prompt Claude 3.5 Sonnet for a response"""
     client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
     message = client.messages.create(
         model="claude-3-5-sonnet-20240620",
