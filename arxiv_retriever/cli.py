@@ -2,6 +2,7 @@ import typer
 from typing_extensions import Annotated
 from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title
 from arxiv_retriever.utils import extract_paper_metadata
+from rag.extractor import extract_essential_info
 
 app = typer.Typer(no_args_is_help=True)
 
@@ -15,6 +16,12 @@ def fetch(categories: Annotated[list[str], typer.Argument(help="ArXiv categories
     try:
         papers = fetch_papers(categories, limit)
         extract_paper_metadata(papers)
+
+        if typer.confirm("\nWould you like to extract essential information from these papers?"):
+            extracted_info = extract_essential_info(papers)
+            for info in extracted_info:
+                typer.echo(f"\n{info['title']}")
+                typer.echo(f"Essential Information:\n{info['extracted_info']}")
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
 
@@ -30,6 +37,12 @@ def search(
     try:
         papers = search_paper_by_title(title, limit)
         extract_paper_metadata(papers)
+
+        if typer.confirm("\nWould you like to extract essential information from these papers?"):
+            extracted_info = extract_essential_info(papers)
+            for info in extracted_info:
+                typer.echo(f"\n{info['title']}")
+                typer.echo(f"Essential Information:\n{info['extracted_info']}")
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
 
