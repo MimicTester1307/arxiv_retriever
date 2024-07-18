@@ -1,5 +1,5 @@
 from typing import List, Dict
-from llm_interface import get_llm_response
+from rag.llm_interface import get_llm_response
 
 
 # Current focus is on extracting essential info from paper abstract.
@@ -17,7 +17,7 @@ def extract_essential_info(papers: List[Dict]) -> List[Dict]:
         
         Please extract and summarize the most essential information from this paper abstract.
         Focus on the main contributions, key findings, and potential impact of the research.
-        You can also suggest future research directions that is grounded in factual and currently available research.
+        Suggest future research directions that is grounded in factual and currently available research.
         Limit your response to 3-5 concise bullet points.
         """
 
