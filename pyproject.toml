@@ -24,8 +24,8 @@ rich = ">=13.7.1"
 shellingham = ">=1.5.4"
 typing-extensions = ">=4.12.2"
 urllib3 = ">=2.2.2"
-anthropic = "^0.31.1"
 python-dotenv = "^1.0.1"
+openai = "^1.36.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=8.2.2"

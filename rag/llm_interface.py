@@ -1,23 +1,32 @@
 import os
-from anthropic import Anthropic
+from openai import OpenAI
 
 from dotenv import load_dotenv
 
 # load environment variables
 load_dotenv()
 
+# define model to use
+MODEL = "gpt-4o-mini-2024-07-18"
+
 
 def get_llm_response(prompt: str) -> str:
     """Prompt Claude 3.5 Sonnet for a response"""
-    client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    message = client.messages.create(
-        model="claude-3-5-sonnet-20240620",
-        max_tokens=1024,
-        temperature=0,
-        system="You are a helpful AI assistant specializing in summarizing scientific papers, extracting the most "
-               "meaningful parts of the paper.",
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), project="proj_X4jQQNOuVT4btKtekQhBo5y4")
+    response = client.chat.completions.create(
         messages=[
-            {"role": "user", "content": prompt}
-        ]
+            {
+                "role": "system",
+                "content": "You are a helpful AI assistant specializing in summarizing scientific papers and "
+                           "extracting the most meaningful parts of the paper as simply and concisely as possible.",
+                "name": "arxiv-bot",
+            },
+            {
+                "role": "user",
+                "content": prompt,
+            }
+        ],
+        model=MODEL,
+        temperature=0,
     )
-    return message.content[0].text
+    return response.choices[0].message.content
