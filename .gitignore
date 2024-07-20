@@ -1,5 +1,8 @@
 # PyCharm
 
+# Mac
+.DS_Store
+
 # User-specific stuff
 .idea/**/workspace.xml
 .idea/**/tasks.xml
