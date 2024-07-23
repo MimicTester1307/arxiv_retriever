@@ -9,12 +9,20 @@ app = typer.Typer(no_args_is_help=True)
 
 @app.command()
 def fetch(categories: Annotated[list[str], typer.Argument(help="ArXiv categories to fetch papers from")],
-          limit: int = typer.Option(10, help="Maximum number of papers to fetch")
+          limit: int = typer.Option(10, help="Maximum number of papers to fetch"),
+          authors: Annotated[list[str], typer.Option(help="Author(s) to refine paper fetching by")] = None,
           ):
-    """Fetch papers from arXiv using specified categories and limit results by specified limit."""
-    typer.echo(f"Fetching up to {limit} papers from categories: {', '.join(categories)}...")
+    """
+    Fetch `limit` papers from ArXiv based on categories and optional authors.
+
+    :param categories: List of ArXiv categories to search
+    :param limit: Total number of results to fetch
+    :param authors: Optional list of author names to filter results by
+    :return: None
+    """
+    typer.echo(f"Fetching up to {limit} papers from categories: {', '.join(categories)} filtered by authors: {', '.join(authors) if authors else ''}...")
     try:
-        papers = fetch_papers(categories, limit)
+        papers = fetch_papers(categories, limit, authors)
         extract_paper_metadata(papers)
 
         if typer.confirm("\nWould you like to extract essential information from these papers?"):
@@ -26,13 +34,20 @@ def fetch(categories: Annotated[list[str], typer.Argument(help="ArXiv categories
 @app.command()
 def search(
         title: Annotated[str, typer.Argument(help="ArXiv title to search for")],
-        limit: int = typer.Option(10, help="Maximum number of papers to search")
+        limit: int = typer.Option(10, help="Maximum number of papers to search"),
+        authors: Annotated[list[str], typer.Option(help="Author(s) to refine paper title search by")] = None,
 ):
-    """Search papers by title."""
-    typer.echo(f"Searching for papers matching {title}...")
+    """
+    Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.
+    :param title: Title of paper to search for
+    :param limit: Total number of results to fetch
+    :param authors: Optional list of author names to filter results by
+    :return: None
+    """
+    typer.echo(f"Searching for papers matching {title}, filtered by authors: {', '.join(authors) if authors else ''}...")
 
     try:
-        papers = search_paper_by_title(title, limit)
+        papers = search_paper_by_title(title, limit, authors)
         extract_paper_metadata(papers)
 
         if typer.confirm("\nWould you like to extract essential information from these papers?"):
