@@ -8,8 +8,8 @@ XML package for parsing XML responses from the arXiv API. It can be useful for r
 want to quickly retrieve an ArXiv paper or keep abreast of latest research in their field without leaving their
 terminal/workstation.
 
-Although my current focus while building `arxiv_retriever` has been on the computer science archive, it can be easily 
-used with categories from other areas on arxiv.
+Although my current focus while building `arxiv_retriever` is the computer science archive, it can be easily 
+used with categories from other areas on arxiv, e.g., `math.CO`.
 
 # Features [more coming soon--see Notion page below for more info]
 - Fetches the most recent papers from ArXiv by specified categories
@@ -38,11 +38,24 @@ options:
    ```
 *Outputs `limit` papers sorted by `submittedDate` in descending order*
 
+To filter results by author(s) use:
+    ```shell
+    arxiv_retriever fetch <categories> [--limit] [--authors]
+    ```
+*Outputs `limit` papers sorted by `submittedDate` in descending order, filtered by `authors`*
+
+
 To retrieve `limit` papers matching a specified title, use the `search` command followed by a title and options:
    ```shell
    arxiv_retriever search <title> [--limit]
    ```
 *Outputs `limit` papers sorted by `relevance` in descending order*
+
+To filter results by author(s) use:
+    ```shell 
+    arxiv_retriever search <title> [--limit] [--authors]
+    ```
+*Outputs `limit` papers sorted by `relevance` in descending order, filtered by authors*
 
 
 ## Example
@@ -53,7 +66,7 @@ Fetch the latest 5 papers in the cs.AI and cs.GL:
 
 Fetch papers matching the title, "Attention is all you need":
    ```shell
-   arxiv_retriever search "Attention is all you need" --limit 5
+   arxiv_retriever search "Attention is all you need" --limit 5 --authors "Ashish"
    ```
 
 # Contributing
