@@ -1,6 +1,6 @@
 from typing import List, Dict
 import typer
-from rag.extractor import extract_essential_info
+from arxiv_retriever.rag.extractor import extract_essential_info
 
 
 def extract_paper_metadata(papers: List[Dict]):
