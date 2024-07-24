@@ -20,18 +20,98 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 - Configurable number of results to fetch
 - Built using only the standard library and tried and tested packages.
 
+# Environment Setup
+This program requires an environment variable (an OpenAI API key) to be set before running. This is used to authenticate
+with OpenAI for the paper summarization feature.
+
+## Required Environment Variable
+- **Variable Name**: `OPENAI_API_KEY`
+
+## Setting the Environment Variable
+
+### On Unix-like systems (Linux, macOS)
+In your terminal, run:
+```shell
+export OPENAI_API_KEY=<key>
+```
+To ensure this works across all shell instances, add the above line to your shell configuration file
+(e.g., `~/.bashrc`, `~/.zshrc`, or `~/.profile`).
+
+### On Windows
+1. Open the Start menu and search for "Environment Variables"
+2. Click on the "Edit system environment variables" option.
+3. In the System Properties window, click on the "Environment Variables" button
+4. Under "User variables", click "New"
+5. Set the variable name as `OPENAI_API_KEY` and the value as your API key.
+
+## Verifying the Environment Variable
+
+To verify the environment variable is set correctly:
+
+- On Unix-like systems:
+  ```shell
+    echo $OPENAI_API_KEY
+    ```
+- On Windows (command prompt):
+  ```
+  echo %OPENAI_API_KEY%
+  ```
+**Note**: Keep your API key confidential and do not share it publicly.
+
 # Installation
-1. Clone the repository:
-   ```shell
-   git clone https://github.com/MimicTester1307/arxiv_retriever.git
-   cd arxiv_retriever  
-   ```
-2. Install the package and dependencies
-   ```shell
-   pip install .
-   ```
+
+## Install the latest version from PyPI using Pip (recommended):
+
+```shell
+pip install --upgrade arxiv-retriever
+```
+
+## Install from Source
+
+To install the latest development version from source:
+1. Ensure you have Poetry installed. If not, install it by following the instructions at [https://python-poetry.org/docs/#installation](https://python-poetry.org/docs/#installation).
+2. Clone the repository:
+    ```shell
+    git clone https://github.com/MimicTester1307/arxiv_retriever.git
+    cd arxiv_retriever  
+    ```
+3. Install the project and its dependencies:
+    ```shell
+    poetry install
+    ```
+4. (Optional) To activate the virtual environment created by Poetry:
+    ```shell
+    poetry shell
+    ```
+5. (Optional) Run tests to ensure everything is set up correctly:
+    ```shell
+    poetry run pytest
+    ```
+6. Build the project:
+    ```shell
+    poetry build
+    ```
+7. Install the wheel file using pip:
+    ```shell
+    pip install dist/arxiv_retriever-1.0.0-py3-none-any.whl
+    ```
 
 # Usage
+
+After ensuring that installation is successful (via pip or source), you can use it using the `axiv` call.
+
+To view available commands:
+```shell
+axiv --help
+```
+
+To view arguments and options for available commands:
+```shell
+axiv <command> --help
+```
+
+## Sample Usage
+
 To retrieve the most recent computer science papers by categories, use the `fetch` command followed by the categories and 
 options:
    ```shell
@@ -39,7 +119,7 @@ options:
    ```
 *Outputs `limit` papers sorted by `submittedDate` in descending order*
 
-To filter results by author(s) use:
+To filter results by author(s):
 ```shell
   axiv fetch <categories> [--limit] [--authors]
 ```
@@ -52,14 +132,14 @@ To retrieve `limit` papers matching a specified title, use the `search` command 
    ```
 *Outputs `limit` papers sorted by `relevance` in descending order*
 
-To filter results by author(s) use:
+To filter results by author(s):
 ```shell
   axiv search <title> [--limit] [--authors]
 ```
 *Outputs `limit` papers sorted by `relevance` in descending order, filtered by authors*
 
 
-## Example
+## Examples
 Fetch the latest 5 papers in the cs.AI and cs.GL:
    ```shell
    axiv fetch cs.AI cs.GL --limit 5
