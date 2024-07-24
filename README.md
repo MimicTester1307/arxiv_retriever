@@ -1,19 +1,20 @@
 # Description
-`arxiv_retriever` is a lightweight command-line tool designed to automate the retrieval of computer science papers from
+`arxivcli` is a lightweight command-line tool designed to automate the retrieval of computer science papers from
 [ArXiv](https://arxiv.org/). The retrieval can be done using specified ArXiv computer science archive categories or 
-using the full or partial title of a specific paper, if you have that.
+using the full or partial title of a specific paper, if available. Paper retrieval can be refined by author.
 
 This tool is built using Python and leverages the Typer library for the command-line interface and the Python ElementTree
 XML package for parsing XML responses from the arXiv API. It can be useful for researchers, engineers, or students who
 want to quickly retrieve an ArXiv paper or keep abreast of latest research in their field without leaving their
 terminal/workstation.
 
-Although my current focus while building `arxiv_retriever` is the computer science archive, it can be easily 
+Although my current focus while building `arxivcli` is the computer science archive, it can be easily 
 used with categories from other areas on arxiv, e.g., `math.CO`.
 
 # Features [more coming soon--see Notion page below for more info]
 - Fetches the most recent papers from ArXiv by specified categories
 - Fetches papers from ArXiv by title
+- Refine fetch and search by author for more precise results
 - Displays paper details including title, authors, publication date, and link to paper's page
 - Easy-to-use command-line interface built with Typer
 - Configurable number of results to fetch
@@ -23,7 +24,7 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 1. Clone the repository:
    ```shell
    git clone https://github.com/MimicTester1307/arxiv_retriever.git
-   cd arxiv_retriever  
+   cd arxivcli  
    ```
 2. Install the package and dependencies
    ```shell
@@ -34,39 +35,39 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 To retrieve the most recent computer science papers by categories, use the `fetch` command followed by the categories and 
 options:
    ```shell
-   arxiv_retriever fetch <categories> [--limit]
+   axiv fetch <categories> [--limit]
    ```
 *Outputs `limit` papers sorted by `submittedDate` in descending order*
 
 To filter results by author(s) use:
-    ```shell
-    arxiv_retriever fetch <categories> [--limit] [--authors]
-    ```
+```shell
+  axiv fetch <categories> [--limit] [--authors]
+```
 *Outputs `limit` papers sorted by `submittedDate` in descending order, filtered by `authors`*
 
 
 To retrieve `limit` papers matching a specified title, use the `search` command followed by a title and options:
    ```shell
-   arxiv_retriever search <title> [--limit]
+   axiv search <title> [--limit]
    ```
 *Outputs `limit` papers sorted by `relevance` in descending order*
 
 To filter results by author(s) use:
-    ```shell 
-    arxiv_retriever search <title> [--limit] [--authors]
-    ```
+```shell
+  axiv search <title> [--limit] [--authors]
+```
 *Outputs `limit` papers sorted by `relevance` in descending order, filtered by authors*
 
 
 ## Example
 Fetch the latest 5 papers in the cs.AI and cs.GL:
    ```shell
-   arxiv_retriever fetch cs.AI cs.GL --limit 5
+   axiv fetch cs.AI cs.GL --limit 5
    ```
 
 Fetch papers matching the title, "Attention is all you need":
    ```shell
-   arxiv_retriever search "Attention is all you need" --limit 5 --authors "Ashish"
+   axiv search "Attention is all you need" --limit 5 --authors "Ashish"
    ```
 
 # Contributing
