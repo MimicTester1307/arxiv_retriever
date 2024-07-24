@@ -60,13 +60,27 @@ To verify the environment variable is set correctly:
 
 # Installation
 
-## Install the latest version from PyPI using Pip (recommended):
+## Install  from PyPI (Recommended):
 
 ```shell
 pip install --upgrade arxiv-retriever
 ```
 
-## Install from Source
+## Install from Source Distribution
+
+If you need a specific version or want to install from a source distribution:
+
+1. Download the source distribution (.tar.gz file) from PyPI or the GitHub releases page.
+
+2. Install using pip:
+   ```bash
+   pip install axiv-x.y.z.tar.gz
+   ```
+   Replace `x.y.z` with the version number.
+
+This method can be useful if you need a specific version or are in an environment without direct access to PyPI.
+
+## Install for Development and Testing
 
 To install the latest development version from source:
 1. Ensure you have Poetry installed. If not, install it by following the instructions at [https://python-poetry.org/docs/#installation](https://python-poetry.org/docs/#installation).
@@ -98,7 +112,7 @@ To install the latest development version from source:
 
 # Usage
 
-After ensuring that installation is successful (via pip or source), you can use it using the `axiv` call.
+After installation, use the package via the `axiv` command:
 
 To view available commands:
 ```shell
@@ -149,6 +163,13 @@ Fetch papers matching the title, "Attention is all you need":
    ```shell
    axiv search "Attention is all you need" --limit 5 --authors "Ashish"
    ```
+
+# Note on Package and Command Names
+
+- **Package Name**: The package is named `arxiv_retriever`. This is the name you use when installing via pip or referring to the project.
+- **Command Name**: After installation, you interact with the tool using the `axiv` command in your terminal.
+
+This distinction allows for a more concise command while maintaining a descriptive package name.
 
 # Contributing
 Contributions are welcome! Please fork the repository and submit a pull request for any features, bug fixes, or
