@@ -1,10 +1,12 @@
 [tool.poetry]
-name = "arxiv-retriever"
+name = "arxivcli"
 version = "0.1.0"
 description = "\"Automate your ArXiv paper search, retrieval, and summarization process.\""
 authors = ["Excel Chukwu <excel.chukwu1.0@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+repository = "https://github.com/MimicTester1307/arxiv_retriever"
+keywords = ["arxiv", "cli", "research"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
