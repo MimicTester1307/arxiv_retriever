@@ -19,7 +19,12 @@ def mock_search(mocker):
     return mocker.patch('arxivcli.cli.search_paper_by_title')
 
 
-def test_fetch_command_success(runner, mock_fetch):
+@pytest.fixture
+def mock_extract_paper_metadata(mocker):
+    return mocker.patch('arxivcli.cli.extract_paper_metadata')
+
+
+def test_fetch_command_success(runner, mock_fetch, mock_extract_paper_metadata, mocker):
     mock_fetch.return_value = [
         {
             'title': 'Test Paper',
@@ -29,14 +34,15 @@ def test_fetch_command_success(runner, mock_fetch):
             'summary': 'Test paper summary.'
         }
     ]
-    result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1"])
+    mocker.patch('typer.confirm', return_value=False)  # mock the confirm to return False, i.e. no summarization
+    result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1", "--authors", "John Doe"])
     assert result.exit_code == 0
-    assert "Test Paper".lower() in result.stdout.lower()
-    assert "John Doe".lower() in result.stdout.lower()
-    mock_fetch.assert_called_once_with(["cs.AI"], 1)
+    assert "Fetching up to 1 papers from categories: cs.AI filtered by authors: John Doe" in result.stdout
+    mock_fetch.assert_called_once_with(["cs.AI"], 1, ["John Doe"])
+    mock_extract_paper_metadata.assert_called_once_with(mock_fetch.return_value)
 
 
-def test_search_command_success(runner, mock_search):
+def test_search_command_success(runner, mock_search, mock_extract_paper_metadata, mocker):
     mock_search.return_value = [
         {
             'title': 'Search Paper Title',
@@ -46,8 +52,8 @@ def test_search_command_success(runner, mock_search):
             'summary': 'Search paper summary.'
         }
     ]
-
-    result = runner.invoke(app, ["search", "search paper title", "--limit", "1"])
+    mocker.patch('typer.confirm', return_value=False)  # mock the confirm to return False, i.e. no summarization
+    result = runner.invoke(app, ["search", "search paper title", "--limit", "1", "--authors", "John Doe"])
     assert result.exit_code == 0
 
     # to create a more robust test based on output result, I will:
@@ -65,4 +71,5 @@ def test_search_command_success(runner, mock_search):
     # searching for combinations in reverse is best case
     assert any(comb.lower() in result.stdout.lower() for comb in title_combinations)  # main thing to check for
     assert "John Doe" in result.stdout
-    mock_search.assert_called_once_with("search paper title", 1)
+    mock_search.assert_called_once_with("search paper title", 1, ["John Doe"])
+    mock_extract_paper_metadata.assert_called_once_with(mock_search.return_value)
