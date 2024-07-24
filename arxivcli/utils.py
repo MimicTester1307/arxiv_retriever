@@ -14,6 +14,7 @@ def extract_paper_metadata(papers: List[Dict]):
 
 
 def summarize_papers(papers: List[Dict]):
+    """Summarize papers in paper list from their abstracts"""
     extracted_info = extract_essential_info(papers)
     for info in extracted_info:
         typer.echo(f"\n{info['title']}")
