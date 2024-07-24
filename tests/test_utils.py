@@ -1,4 +1,4 @@
-from arxivcli.cli import app
+from arxiv_retriever.cli import app
 
 import pytest
 from typer.testing import CliRunner
@@ -11,7 +11,7 @@ def runner():
 
 @pytest.fixture
 def mock_fetch(mocker):
-    return mocker.patch('arxivcli.cli.fetch_papers')
+    return mocker.patch('arxiv_retriever.cli.fetch_papers')
 
 
 def test_extract_paper_metadata_output(runner, mock_fetch, mocker):

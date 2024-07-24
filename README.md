@@ -24,7 +24,7 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 1. Clone the repository:
    ```shell
    git clone https://github.com/MimicTester1307/arxiv_retriever.git
-   cd arxivcli  
+   cd arxiv_retriever  
    ```
 2. Install the package and dependencies
    ```shell

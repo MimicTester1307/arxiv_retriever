@@ -1,7 +1,7 @@
 import urllib.parse
 from typing import List, Dict
 
-from arxivcli.fetcher import fetch_papers, search_paper_by_title, parse_arxiv_response, rate_limited_get
+from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title, parse_arxiv_response, rate_limited_get
 
 from pytest_mock import MockerFixture
 import pytest
@@ -9,12 +9,12 @@ import pytest
 
 @pytest.fixture
 def mock_rate_limited_get(mocker: MockerFixture):
-    return mocker.patch('arxivcli.fetcher.rate_limited_get')
+    return mocker.patch('arxiv_retriever.fetcher.rate_limited_get')
 
 
 @pytest.fixture
 def mock_parse_arxiv_response(mocker: MockerFixture):
-    return mocker.patch('arxivcli.fetcher.parse_arxiv_response')
+    return mocker.patch('arxiv_retriever.fetcher.parse_arxiv_response')
 
 
 def test_parse_arxiv_response():

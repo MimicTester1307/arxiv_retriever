@@ -1,7 +1,7 @@
 import typer
 from typing_extensions import Annotated
-from arxivcli.fetcher import fetch_papers, search_paper_by_title
-from arxivcli.utils import extract_paper_metadata, summarize_papers
+from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title
+from arxiv_retriever.utils import extract_paper_metadata, summarize_papers
 
 
 app = typer.Typer(no_args_is_help=True)
@@ -57,7 +57,7 @@ def search(
 
 
 def main():
-    """Entry point for arxivcli"""
+    """Entry point for arxiv_retriever"""
     app()
 
 

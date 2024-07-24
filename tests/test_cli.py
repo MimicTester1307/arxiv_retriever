@@ -1,7 +1,7 @@
 from itertools import combinations
 import pytest
 from typer.testing import CliRunner
-from arxivcli.cli import app
+from arxiv_retriever.cli import app
 
 
 @pytest.fixture
@@ -11,17 +11,17 @@ def runner():
 
 @pytest.fixture
 def mock_fetch(mocker):
-    return mocker.patch('arxivcli.cli.fetch_papers')
+    return mocker.patch('arxiv_retriever.cli.fetch_papers')
 
 
 @pytest.fixture
 def mock_search(mocker):
-    return mocker.patch('arxivcli.cli.search_paper_by_title')
+    return mocker.patch('arxiv_retriever.cli.search_paper_by_title')
 
 
 @pytest.fixture
 def mock_extract_paper_metadata(mocker):
-    return mocker.patch('arxivcli.cli.extract_paper_metadata')
+    return mocker.patch('arxiv_retriever.cli.extract_paper_metadata')
 
 
 def test_fetch_command_success(runner, mock_fetch, mock_extract_paper_metadata, mocker):

@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "arxivcli"
+name = "arxiv_retriever"
 version = "0.1.0"
 description = "\"Automate your ArXiv paper search, retrieval, and summarization process.\""
 authors = ["Excel Chukwu <excel.chukwu1.0@gmail.com>"]
@@ -34,7 +34,7 @@ pytest = ">=8.2.2"
 pytest-mock = ">=3.14.0"
 
 [tool.poetry.scripts]
-axiv = "arxivcli.cli:main"
+axiv = "arxiv_retriever.cli:main"
 
 [build-system]
 requires = ["poetry-core"]
