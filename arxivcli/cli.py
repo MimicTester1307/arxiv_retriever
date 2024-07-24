@@ -56,5 +56,10 @@ def search(
         typer.echo(f"An error occurred: {str(e)}", err=True)
 
 
-if __name__ == "__main__":
+def main():
+    """Entry point for arxivcli"""
     app()
+
+
+if __name__ == "__main__":
+    main()
