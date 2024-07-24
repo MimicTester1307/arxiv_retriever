@@ -28,13 +28,11 @@ def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]]
     start = 0  # index of the first returned result
     max_results_per_query = 100
 
-    category_query = '+OR+'.join(categories)
-    author_query = '+OR+'.join(urllib.parse.quote_plus(author) for author in authors) if authors else ''
+    category_query = '+OR+'.join(f'cat:{cat}' for cat in categories)
+    author_query = '+AND+(' + '+OR+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
 
     while start < limit:
-        # due to filtering process, fetching may not return result for valid categories if author is empty, so different
-        # query is used based on whether author is supplied or not
-        query = f"search_query=cat:{category_query}+AND+au:{author_query}&sortBy=submittedDate&sortOrder=descending&start={start}&max_results={max_results_per_query}" if authors else f"search_query=cat:{category_query}&sortBy=submittedDate&sortOrder=descending&start={start}&max_results={max_results_per_query}"
+        query = f"search_query={category_query}{author_query}&sortBy=submittedDate&sortOrder=descending&start={start}&max_results={max_results_per_query}"
         response = rate_limited_get(base_url + query)
 
         if response.status_code == 200:
@@ -63,12 +61,10 @@ def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] =
     max_results_per_query = 100
 
     title_query = f'ti:"{encoded_title}"'
-    author_query = '+OR+'.join(urllib.parse.quote_plus(author) for author in authors) if authors else ''
+    author_query = '+AND+(' + '+OR+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
 
     while start < limit:
-        # due to filtering process, title search may not return result for valid title if author is empty, so different
-        # query is used based on whether author is supplied or not
-        query = f"search_query={title_query}+AND+au:{author_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}" if authors else f"search_query={title_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}"
+        query = f"search_query={title_query}{author_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}" if authors else f"search_query={title_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}"
         response = rate_limited_get(base_url + query)
 
         if response.status_code == 200:
