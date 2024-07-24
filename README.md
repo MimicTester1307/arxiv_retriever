@@ -1,5 +1,5 @@
 # Description
-`arxivcli` is a lightweight command-line tool designed to automate the retrieval of computer science papers from
+`arxiv_retriever` is a lightweight command-line tool designed to automate the retrieval of computer science papers from
 [ArXiv](https://arxiv.org/). The retrieval can be done using specified ArXiv computer science archive categories or 
 using the full or partial title of a specific paper, if available. Paper retrieval can be refined by author.
 
@@ -8,7 +8,7 @@ XML package for parsing XML responses from the arXiv API. It can be useful for r
 want to quickly retrieve an ArXiv paper or keep abreast of latest research in their field without leaving their
 terminal/workstation.
 
-Although my current focus while building `arxivcli` is the computer science archive, it can be easily 
+Although my current focus while building `arxiv_retriever` is the computer science archive, it can be easily 
 used with categories from other areas on arxiv, e.g., `math.CO`.
 
 # Features [more coming soon--see Notion page below for more info]
