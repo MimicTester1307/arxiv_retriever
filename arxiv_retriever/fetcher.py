@@ -44,7 +44,6 @@ def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]]
     return papers[:limit]  # Trim to the requested number of results
 
 
-# TODO: add optional author parameter to refine title search by author
 def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] = None) -> List[Dict]:
     """
     Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.

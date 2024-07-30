@@ -11,7 +11,7 @@ MODEL = "gpt-4o-mini-2024-07-18"
 
 
 def get_llm_response(prompt: str) -> str:
-    """Prompt Claude 3.5 Sonnet for a response"""
+    """Prompt GPT-4o-mini for a response"""
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), project="proj_X4jQQNOuVT4btKtekQhBo5y4")
     response = client.chat.completions.create(
         messages=[
