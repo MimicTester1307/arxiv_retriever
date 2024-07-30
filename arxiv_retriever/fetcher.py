@@ -1,20 +1,22 @@
-import requests
+import os
 from typing import List, Dict, Optional
 import xml.etree.ElementTree as ET  # TODO: explore way to parse XML data more securely
 import urllib.parse
-import time
+
+import trio
+import httpx
 
 WAIT_TIME = 3  # number of seconds to wait between calls
 
 
-def rate_limited_get(url: str) -> requests.Response:
-    """Make a GET request with rate limiting."""
-    response = requests.get(url)
-    time.sleep(WAIT_TIME)
+async def rate_limited_get(client: httpx.AsyncClient, url: str) -> httpx.Response:
+    """Make an asynchronous GET request with rate limiting."""
+    response = await client.get(url)
+    await trio.sleep(WAIT_TIME)
     return response
 
 
-def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]] = None) -> List[Dict]:
+async def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]] = None) -> List[Dict]:
     """
     Fetch papers from ArXiv using given categories and limit, with optional author filter.
 
@@ -31,20 +33,21 @@ def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]]
     category_query = '+OR+'.join(f'cat:{cat}' for cat in categories)
     author_query = '+AND+(' + '+OR+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
 
-    while start < limit:
-        query = f"search_query={category_query}{author_query}&sortBy=submittedDate&sortOrder=descending&start={start}&max_results={max_results_per_query}"
-        response = rate_limited_get(base_url + query)
+    async with httpx.AsyncClient() as client:
+        while start < limit:
+            query = f"search_query={category_query}{author_query}&sortBy=submittedDate&sortOrder=descending&start={start}&max_results={max_results_per_query}"
+            response = await rate_limited_get(client, base_url + query)
 
-        if response.status_code == 200:
-            papers.extend(parse_arxiv_response(response.text))
-            start += max_results_per_query
-        else:
-            raise Exception(f"Failed to fetch papers: HTTP {response.status_code}")
+            if response.status_code == 200:
+                papers.extend(parse_arxiv_response(response.text))
+                start += max_results_per_query
+            else:
+                raise Exception(f"Failed to fetch papers: HTTP {response.status_code}")
 
     return papers[:limit]  # Trim to the requested number of results
 
 
-def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] = None) -> List[Dict]:
+async def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] = None) -> List[Dict]:
     """
     Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.
 
@@ -62,15 +65,16 @@ def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] =
     title_query = f'ti:"{encoded_title}"'
     author_query = '+AND+(' + '+OR+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
 
-    while start < limit:
-        query = f"search_query={title_query}{author_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}" if authors else f"search_query={title_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}"
-        response = rate_limited_get(base_url + query)
+    async with httpx.AsyncClient() as client:
+        while start < limit:
+            query = f"search_query={title_query}{author_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}" if authors else f"search_query={title_query}&sortBy=relevance&sortOrder=descending&start={start}&max_results={max_results_per_query}"
+            response = await rate_limited_get(client, base_url + query)
 
-        if response.status_code == 200:
-            papers.extend(parse_arxiv_response(response.text))
-            start += max_results_per_query
-        else:
-            raise Exception(f"Failed to search papers: HTTP {response.status_code}")
+            if response.status_code == 200:
+                papers.extend(parse_arxiv_response(response.text))
+                start += max_results_per_query
+            else:
+                raise Exception(f"Failed to search papers: HTTP {response.status_code}")
 
     return papers[:limit]
 
@@ -86,13 +90,55 @@ def parse_arxiv_response(xml_data: str) -> List[Dict]:
 
     papers = []
     for entry in root.findall('atom:entry', namespace):
+        # find pdf link
+        pdf_link = next((link.get('href') for link in entry.findall('atom:link', namespace) if link.get('title') == 'pdf'), None)
         paper = {
             'title': entry.find('atom:title', namespace).text.strip(),
             'authors': [author.find('atom:name', namespace).text for author in entry.findall('atom:author', namespace)],
             'summary': entry.find('atom:summary', namespace).text.strip(),
             'published': entry.find('atom:published', namespace).text.strip(),
-            'link': entry.find('atom:id', namespace).text.strip()
+            'abstract_link': entry.find('atom:id', namespace).text.strip(),
+            'pdf_link': pdf_link,
         }
         papers.append(paper)
 
     return papers
+
+
+async def _download_paper(client: httpx.AsyncClient, paper: Dict, download_dir: str):
+    """
+    Download a paper and save it to the specified directory.
+    :param client: httpx AsyncClient instance
+    :param paper: Dictionary containing paper information
+    :param download_dir: Directory to save downloaded papers
+    :return: None
+    """
+    if not paper['pdf_link']:
+        print(f"No PDF link for paper {paper['title']}")
+        return
+
+    filename = f"{paper['title'].replace(' ', '_')[:20]}.pdf"
+    filepath = os.path.join(download_dir, filename)
+
+    try:
+        response = await client.get(paper['pdf_link'])
+        response.raise_for_status()
+        with open(filepath, 'wb') as file:
+            file.write(response.content)
+        print(f"Downloaded {filename} to {filepath}")
+    except httpx.HTTPStatusError as err:
+        print(f"Failed to download '{paper['title']}': HTTP {err.response.status_code}")
+
+
+async def download_papers(papers: List[Dict], download_dir: str):
+    """
+    Download multiple papers asynchronously and save them to the specified directory.
+    :param papers: List of dictionaries containing paper information
+    :param download_dir: Directory to save downloaded papers
+    :return: None
+    """
+    os.makedirs(download_dir, exist_ok=True)
+    async with httpx.AsyncClient() as client:
+        async with trio.open_nursery() as nursery:
+            for paper in papers:
+                nursery.start_soon(_download_paper, client, paper, download_dir)

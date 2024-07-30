@@ -1,4 +1,5 @@
-# PyCharm
+# default folder where local axiv papers are downloaded
+axiv_downloads/
 
 # Mac
 .DS_Store
