@@ -3,6 +3,10 @@
 [ArXiv](https://arxiv.org/). The retrieval can be done using specified ArXiv computer science archive categories or 
 using the full or partial title of a specific paper, if available. Paper retrieval can be refined by author.
 
+**NB:** Tests indicate that when searching for a really long title, using the partial title and then refining by author
+yields better results, as opposed to searching with the full title or even searching with the full title and refining by
+author.
+
 This tool is built using Python and leverages the Typer library for the command-line interface and the Python ElementTree
 XML package for parsing XML responses from the arXiv API. It can be useful for researchers, engineers, or students who
 want to quickly retrieve an ArXiv paper or keep abreast of latest research in their field without leaving their
@@ -13,7 +17,7 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 
 # Features [more coming soon--see Notion page below for more info]
 - Fetches the most recent papers from ArXiv by specified categories
-- Fetches papers from ArXiv by title
+- Search for papers on ArXiv using full or partial title
 - Refine fetch and search by author for more precise results
 - Displays paper details including title, authors, publication date, and link to paper's page
 - Easy-to-use command-line interface built with Typer
@@ -21,10 +25,11 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 - Built using only the standard library and tried and tested packages.
 
 # Environment Setup
-This program requires an environment variable (an OpenAI API key) to be set before running. This is used to authenticate
-with OpenAI for the paper summarization feature.
+You can optionally set an environment variable (an OpenAI API key) before using the program. This is used to authenticate
+with OpenAI for the paper summarization feature. If you do not want your papers summarized, you will not need to set the
+environment variable. Simply enter 'N' when asked by the CLI. Specifying 'y' without a KEY set will lead to an error.
 
-## Required Environment Variable
+## Optional Environment Variable
 - **Variable Name**: `OPENAI_API_KEY`
 
 ## Setting the Environment Variable
