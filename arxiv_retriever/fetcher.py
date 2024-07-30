@@ -142,3 +142,47 @@ async def download_papers(papers: List[Dict], download_dir: str):
         async with trio.open_nursery() as nursery:
             for paper in papers:
                 nursery.start_soon(_download_paper, client, paper, download_dir)
+
+
+async def _download_single_paper_from_link(client: httpx.AsyncClient, link: str, download_dir: str):
+    """
+    Download a single paper from an ArXiv link, converting it to a PDF link if necessary.
+
+    :param client: httpx AsyncClient instance
+    :param link: ArXiv link (can be PDF or abstract link)
+    :param download_dir: Directory to save downloaded papers
+    :return: None
+    """
+
+    # convert abstract link to PDF if necessary
+    if '/abs' in link:
+        pdf_link = link.replace('/abs/', '/pdf/')
+    else:
+        pdf_link = link
+
+    filename = os.path.basename(pdf_link) + '.pdf'
+    filepath = os.path.join(download_dir, filename)
+
+    try:
+        response = await client.get(pdf_link)
+        response.raise_for_status()
+        with open(filepath, 'wb') as file:
+            file.write(response.content)
+        print(f"Downloaded {filename} to {filepath}")
+    except httpx.HTTPStatusError as err:
+        print(f"Failed to download '{pdf_link}': HTTP {err.response.status_code}")
+
+
+async def download_from_links(links: List[str], download_dir: str):
+    """
+    Download papers from a list of ArXiv links, handling both PDF and abstract links.
+
+    :param links: List of ArXiv links (can be PDF or abstract links)
+    :param download_dir: Directory to save downloaded papers
+    :return: None
+    """
+    os.makedirs(download_dir, exist_ok=True)
+    async with httpx.AsyncClient() as client:
+        async with trio.open_nursery() as nursery:
+            for link in links:
+                nursery.start_soon(_download_single_paper_from_link, client, link, download_dir)
