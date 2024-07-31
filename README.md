@@ -1,11 +1,11 @@
 # Description
 `arxiv_retriever` is a lightweight command-line tool designed to automate the retrieval of computer science papers from
-[ArXiv](https://arxiv.org/). The retrieval can be done using specified ArXiv computer science archive categories or 
-using the full or partial title of a specific paper, if available. Paper retrieval can be refined by author.
+[ArXiv](https://arxiv.org/). The retrieval can be done using specified ArXiv computer science archive categories, full or partial 
+titles of papers, if available, or links to the papers. Paper retrieval can be refined by author.
 
-**NB:** Tests indicate that when searching for a really long title, using the partial title and then refining by author
+**NOTE:** My tests indicate that when searching for a really long title, using the partial title and then refining by author
 yields better results, as opposed to searching with the full title or even searching with the full title and refining by
-author.
+author. However, the tests are not exhaustive.
 
 This tool is built using Python and leverages the Typer library for the command-line interface and the Python ElementTree
 XML package for parsing XML responses from the arXiv API. It can be useful for researchers, engineers, or students who
@@ -19,7 +19,8 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 - Fetches the most recent papers from ArXiv by specified categories
 - Search for papers on ArXiv using full or partial title
 - Refine fetch and search by author for more precise results
-- Displays paper details including title, authors, publication date, and link to paper's page
+- View paper details including title, authors, abstract, publication date, and links to paper's abstract and pdf pages
+- Download papers after they are retrieved using `fetch` or `search`, or directly using `download`
 - Easy-to-use command-line interface built with Typer
 - Configurable number of results to fetch
 - Built using only the standard library and tried and tested packages.
@@ -27,7 +28,7 @@ used with categories from other areas on arxiv, e.g., `math.CO`.
 # Environment Setup
 You can optionally set an environment variable (an OpenAI API key) before using the program. This is used to authenticate
 with OpenAI for the paper summarization feature. If you do not want your papers summarized, you will not need to set the
-environment variable. Simply enter 'N' when asked by the CLI. Specifying 'y' without a KEY set will lead to an error.
+environment variable. Specify your choice when asked by the CLI. Specifying 'y' without the KEY set will lead to an error.
 
 ## Optional Environment Variable
 - **Variable Name**: `OPENAI_API_KEY`
@@ -61,7 +62,7 @@ To verify the environment variable is set correctly:
   ```
   echo %OPENAI_API_KEY%
   ```
-**Note**: Keep your API key confidential and do not share it publicly.
+**NOTE:** Keep your API key confidential and do not share it publicly.
 
 # Installation
 
@@ -144,7 +145,6 @@ To filter results by author(s):
 ```
 *Outputs `limit` papers sorted by `submittedDate` in descending order, filtered by `authors`*
 
-
 To retrieve `limit` papers matching a specified title, use the `search` command followed by a title and options:
    ```shell
    axiv search <title> [--limit]
@@ -157,17 +157,39 @@ To filter results by author(s):
 ```
 *Outputs `limit` papers sorted by `relevance` in descending order, filtered by authors*
 
+### Downloading your research papers
+There are multiple ways to download your research paper using `axiv`:
+- use `axiv download <link> [--download_dir]` to download the paper directly from the link
+- confirm if you want to download the retrieved papers using `fetch` or `search` when asked by the CLI
+
+With option 1, the file is named using the URL's basename, e.g. `2407.09298v1.pdf`.
+
+With options 2, the file is named using the title retrieved from the XML data when parsing.
+
+**NOTE:** If the file name exists, it is overwritten.
+
 
 ## Examples
-Fetch the latest 5 papers in the cs.AI and cs.GL:
+Fetch the latest 5 papers in the cs.AI and cs.GL categories:
    ```shell
    axiv fetch cs.AI cs.GL --limit 5
    ```
 
-Fetch papers matching the title, "Attention is all you need":
+Fetch papers matching the title, "Attention is all you need", refined by author "Ashish":
    ```shell
    axiv search "Attention is all you need" --limit 5 --authors "Ashish"
    ```
+
+Download papers using links:
+
+- download using link to abstract:
+    ```shell
+        axiv download https://arxiv.org/abs/2407.20214v1
+    ```
+- download using link to pdf:
+    ```shell
+    axiv download https://arxiv.org/pdf/2407.20214v1
+    ```
 
 # Note on Package and Command Names
 
@@ -180,12 +202,19 @@ This distinction allows for a more concise command while maintaining a descripti
 Contributions are welcome! Please fork the repository and submit a pull request for any features, bug fixes, or
 enhancements.
 
+## Note on Testing
+
+Currently, 10 out of 11 tests pass, and even that required a bit of magic. Refactoring the tests for asynchrony was
+an interesting challenge. Discussions and contributions regarding the asynchronous implementation are particularly
+welcome.
+
+You can contact me via email or leave a comment on the [Notion project tracker](https://clover-gymnast-aeb.notion.site/ArXiv-Retriever-630d06d96edf4bfea17248cc890c021e?pvs=4).
+
 # License
 This project is licensed under the MIT license. See the LICENSE file for more details.
 
 # Acknowledgements
 - [Typer](https://typer.tiangolo.com/) for the command-line interface
 - [ElementTree](https://docs.python.org/3/library/xml.etree.elementtree.html) for XML parsing
-- [arXiv API](https://info.arxiv.org/help/api/basics.html) for providing access to paper metadata
-- [Notion](https://clover-gymnast-aeb.notion.site/ArXiv-Retriever-630d06d96edf4bfea17248cc890c021e?pvs=4) for helping me 
-  track my progress and document my learning.
+- [arXiv API](https://info.arxiv.org/help/api/basics.html) for providing access to paper metadata via a well-designed API
+- [Trio](https://trio.readthedocs.io/en/stable/index.html) and [HTTPx](https://www.python-httpx.org/) for the asynchronous features
