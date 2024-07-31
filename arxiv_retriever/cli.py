@@ -51,7 +51,7 @@ def search(
 
     try:
         async def run():
-            papers = await search_paper_by_title(title, limit, authors)
+            papers = search_paper_by_title(title, limit, authors)
             await process_papers(papers)
 
         trio.run(run)
@@ -60,7 +60,7 @@ def search(
 
 
 @app.command()
-async def download(
+def download(
         links: Annotated[List[str], typer.Argument(help="ArXiv links to download")],
         download_dir: str = typer.Option("./axiv_downloads", help="Directory to download papers"),
 ):

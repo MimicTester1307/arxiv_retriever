@@ -155,7 +155,7 @@ async def _download_single_paper_from_link(client: httpx.AsyncClient, link: str,
     """
 
     # convert abstract link to PDF if necessary
-    if '/abs' in link:
+    if '/abs/' in link:
         pdf_link = link.replace('/abs/', '/pdf/')
     else:
         pdf_link = link
