@@ -15,7 +15,7 @@ terminal/workstation.
 Although my current focus while building `arxiv_retriever` is the computer science archive, it can be easily 
 used with categories from other areas on arxiv, e.g., `math.CO`.
 
-# Features [more coming soon--see Notion page below for more info]
+# Features
 - Fetches the most recent papers from ArXiv by specified categories
 - Search for papers on ArXiv using full or partial title
 - Refine fetch and search by author for more precise results
