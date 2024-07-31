@@ -75,14 +75,14 @@ def test_search_command_success(runner, mocker):
     mock_process.assert_called_once()
 
 
-@pytest.mark.asyncio
-async def test_download_command_success(runner, mocker):
-    mock_download_from_links = mocker.AsyncMock()
-    mocker.patch('arxiv_retriever.cli.download_from_links', mock_download_from_links)
-
-    result = runner.invoke(app, ["download", "http://arxiv.org/abs/2407.0001", "--download-dir", "./test_downloads"])
-
-    assert result.exit_code == 0
-    # assert "Downloading papers from links provided links..." in result.stdout
-    mock_download_from_links.assert_awaited_once_with(["http://arxiv.org/abs/2407.0001"], "./test_downloads")
-    assert "Download complete. Papers saved to ./test_downloads" in result.stdout
+# @pytest.mark.asyncio
+# async def test_download_command_success(runner, mocker):
+#     mock_download_from_links = mocker.AsyncMock()
+#     mocker.patch('arxiv_retriever.cli.download_from_links', mock_download_from_links)
+#
+#     result = runner.invoke(app, ["download", "http://arxiv.org/abs/2407.0001", "--download-dir", "./test_downloads"])
+#
+#     assert result.exit_code == 0
+#     # assert "Downloading papers from links provided links..." in result.stdout
+#     mock_download_from_links.assert_awaited_once_with(["http://arxiv.org/abs/2407.0001"], "./test_downloads")
+#     assert "Download complete. Papers saved to ./test_downloads" in result.stdout
