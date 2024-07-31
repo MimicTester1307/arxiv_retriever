@@ -60,7 +60,7 @@ def search(
 
 
 @app.command()
-def download(
+async def download(
         links: Annotated[List[str], typer.Argument(help="ArXiv links to download")],
         download_dir: str = typer.Option("./axiv_downloads", help="Directory to download papers"),
 ):
@@ -71,7 +71,7 @@ def download(
     :param download_dir: Directory to download papers
     :return: None
     """
-    typer.echo(f"Downloading papers from links provided links...")
+    typer.echo(f"Downloading papers from provided links...")
 
     try:
         trio.run(download_from_links, links, download_dir)

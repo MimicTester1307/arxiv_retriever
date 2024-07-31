@@ -1,20 +1,8 @@
-import urllib.parse
 from typing import List, Dict
 
-from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title, parse_arxiv_response, rate_limited_get
+from arxiv_retriever.fetcher import fetch_papers, search_paper_by_title, parse_arxiv_response
 
-from pytest_mock import MockerFixture
 import pytest
-
-
-@pytest.fixture
-def mock_rate_limited_get(mocker: MockerFixture):
-    return mocker.patch('arxiv_retriever.fetcher.rate_limited_get')
-
-
-@pytest.fixture
-def mock_parse_arxiv_response(mocker: MockerFixture):
-    return mocker.patch('arxiv_retriever.fetcher.parse_arxiv_response')
 
 
 def test_parse_arxiv_response():
@@ -34,11 +22,12 @@ def test_parse_arxiv_response():
         <author xmlns="http://www.w3.org/2005/Atom">
           <name xmlns="http://www.w3.org/2005/Atom">H1 Collaboration</name>
         </author>
+        <link href="http://arxiv.org/pdf/hep-ex/0307015" rel="related" title="pdf" type="application/pdf"/>
       </entry>
     </feed>
     """
 
-    expected_result_features = ['title', 'authors', 'summary', 'published', 'link']
+    expected_result_features = ['title', 'authors', 'summary', 'published', 'abstract_link', 'pdf_link']
     result = parse_arxiv_response(mock_xml)
     assert len(result) == 1
     assert isinstance(result, List) and isinstance(result[0], Dict)  # returns expected type
@@ -47,39 +36,53 @@ def test_parse_arxiv_response():
     assert result[0]['authors'] == ['H1 Collaboration']
     assert result[0]['summary'] == 'Test Summary'
     assert result[0]['published'] == '2003-07-07T13:46:39-04:00'
-    assert result[0]['link'] == 'http://arxiv.org/abs/hep-ex/0307015'
+    assert result[0]['abstract_link'] == 'http://arxiv.org/abs/hep-ex/0307015'
+    assert result[0]['pdf_link'] == 'http://arxiv.org/pdf/hep-ex/0307015'
 
 
-# NB: following tests with authors are tricky because when search is refined by author, results may be less than limit
-# and should still pass. But here, I'm enforcing that the number of results returned should equal specified limit. This
-# works, but there is probably better way to handle this
-def test_fetch_papers_success(mock_rate_limited_get, mock_parse_arxiv_response, mocker: MockerFixture):
+# NB: following tests with authors are a bit tricky because when search is refined by author, results may be less
+# than limit and should still pass. But here, I'm enforcing that the number of results returned should equal
+# specified limit. This works, but there is probably better way to handle this
+@pytest.mark.asyncio
+async def test_fetch_papers_success(mocker):
     """Test fetch_papers function without authors"""
+    mock_rate_limited_get = mocker.AsyncMock()
+    mock_parse_arxiv_response = mocker.Mock()
+    mocker.patch('arxiv_retriever.fetcher.rate_limited_get', mock_rate_limited_get)
+    mocker.patch('arxiv_retriever.fetcher.parse_arxiv_response', mock_parse_arxiv_response)
+
     # Arrange
     categories = ['cs.AI', 'math.CO']
     limit = 5
     authors = None
     expected_url = ("http://export.arxiv.org/api/query?search_query=cat:cs.AI+OR+cat:math.CO&sortBy=submittedDate"
                     "&sortOrder=descending&start=0&max_results=100")
+
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = '<fake_xml>Fake ArXiv response</fake_xml>'
     mock_rate_limited_get.return_value = mock_response
 
-    expected_parsed_result = [{'title': 'Test paper', 'authors': ['John Doe']}] * 5
+    expected_parsed_result = [{'title': 'Test paper', 'authors': ['John Doe'], 'pdf_link': 'http://arxiv.org/pdf/2407.0002'}] * 5
     mock_parse_arxiv_response.return_value = expected_parsed_result
 
     # Act
-    result = fetch_papers(categories, limit, authors)
+    result = await fetch_papers(categories, limit, authors)
 
     # Assert
-    mock_rate_limited_get.assert_called_once_with(expected_url)
+    mock_rate_limited_get.assert_awaited_once_with(mocker.ANY, expected_url)
     mock_parse_arxiv_response.assert_called_once_with(mock_response.text)
     assert result == expected_parsed_result[:limit]
 
 
-def test_fetch_papers_with_authors(mock_rate_limited_get, mock_parse_arxiv_response, mocker: MockerFixture):
+@pytest.mark.asyncio
+async def test_fetch_papers_with_authors(mocker):
     """Test fetch_papers function with authors."""
+    mock_rate_limited_get = mocker.AsyncMock()
+    mock_parse_arxiv_response = mocker.Mock()
+    mocker.patch('arxiv_retriever.fetcher.rate_limited_get', mock_rate_limited_get)
+    mocker.patch('arxiv_retriever.fetcher.parse_arxiv_response', mock_parse_arxiv_response)
+
     # Arrange
     categories = ['cs.AI']
     limit = 5
@@ -92,70 +95,76 @@ def test_fetch_papers_with_authors(mock_rate_limited_get, mock_parse_arxiv_respo
     mock_response.text = '<fake_xml>Fake ArXiv response</fake_xml>'
     mock_rate_limited_get.return_value = mock_response
 
-    expected_parsed_result = [{'title': 'Test paper', 'authors': ['John Doe', 'Jane Smith']}] * 5
+    expected_parsed_result = [{'title': 'Test paper', 'authors': ['John Doe', 'Jane Smith'], 'pdf_link': 'http://arxiv.org/pdf/2407.0002'}] * 5
     mock_parse_arxiv_response.return_value = expected_parsed_result
 
     # Act
-    result = fetch_papers(categories, limit, authors)
+    result = await fetch_papers(categories, limit, authors)
 
     # Assert
-    mock_rate_limited_get.assert_called_once_with(expected_url)
+    mock_rate_limited_get.assert_awaited_once_with(mocker.ANY, expected_url)
     mock_parse_arxiv_response.assert_called_once_with(mock_response.text)
     assert result == expected_parsed_result[:limit]
 
 
-def test_search_paper_by_title_success(mock_rate_limited_get, mock_parse_arxiv_response, mocker: MockerFixture):
+@pytest.mark.asyncio
+async def test_search_paper_by_title_success(mocker):
     """Test search_paper_by_title function without authors"""
+    mock_rate_limited_get = mocker.AsyncMock()
+    mock_parse_arxiv_response = mocker.Mock()
+    mocker.patch('arxiv_retriever.fetcher.rate_limited_get', mock_rate_limited_get)
+    mocker.patch('arxiv_retriever.fetcher.parse_arxiv_response', mock_parse_arxiv_response)
+
     # Arrange
     title = "Attention Is All You Need"
     limit = 5
-    authors = None
-    encoded_title = urllib.parse.quote_plus(title)
-    expected_url = (f'http://export.arxiv.org/api/query?search_query=ti:"{encoded_title}"&sortBy=relevance&sortOrder'
-                    f'=descending&start=0&max_results=100')
+    expected_url = (f'http://export.arxiv.org/api/query?search_query=ti:"Attention+Is+All+You+Need"&sortBy=relevance'
+                    f'&sortOrder=descending&start=0&max_results=100')
 
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = '<fake_xml>Fake ArXiv response</fake_xml>'
     mock_rate_limited_get.return_value = mock_response
 
-    expected_parsed_result = [{'title': 'Attention Is All You Need', 'authors': ['John Doe']}] * 5
+    expected_parsed_result = [{'title': 'Attention Is All You Need', 'authors': ['John Doe'], 'pdf_link': 'http://arxiv.org/pdf/2407.0003'}] * 5
     mock_parse_arxiv_response.return_value = expected_parsed_result
 
     # Act
-    result = search_paper_by_title(title, limit, authors)
+    result = await search_paper_by_title(title, limit)
 
     # Assert
-    assert encoded_title == 'Attention+Is+All+You+Need'
-    assert expected_url == (f'http://export.arxiv.org/api/query?search_query=ti:"Attention+Is+All+You+Need"&sortBy'
-                            f'=relevance&sortOrder=descending&start=0&max_results=100')
-    mock_rate_limited_get.assert_called_once_with(expected_url)
+    mock_rate_limited_get.assert_awaited_once_with(mocker.ANY, expected_url)
     mock_parse_arxiv_response.assert_called_once_with(mock_response.text)
     assert result == expected_parsed_result[:limit]
 
 
-def test_search_paper_by_title_with_authors(mock_rate_limited_get, mock_parse_arxiv_response, mocker: MockerFixture):
+@pytest.mark.asyncio
+async def test_search_paper_by_title_with_authors(mocker):
     """Test search_paper_by_title function with authors."""
+    mock_rate_limited_get = mocker.AsyncMock()
+    mock_parse_arxiv_response = mocker.Mock()
+    mocker.patch('arxiv_retriever.fetcher.rate_limited_get', mock_rate_limited_get)
+    mocker.patch('arxiv_retriever.fetcher.parse_arxiv_response', mock_parse_arxiv_response)
+
     # Arrange
     title = "Attention Is All You Need"
     limit = 5
     authors = ['Vaswani', 'Shazeer']
-    encoded_title = urllib.parse.quote_plus(title)
-    expected_url = (f'http://export.arxiv.org/api/query?search_query=ti:"{encoded_title}"+AND+(au:"Vaswani"+OR+au'
-                    f':"Shazeer")&sortBy=relevance&sortOrder=descending&start=0&max_results=100')
+    expected_url = (f'http://export.arxiv.org/api/query?search_query=ti:"Attention+Is+All+You+Need"+AND+('
+                    f'au:"Vaswani"+OR+au:"Shazeer")&sortBy=relevance&sortOrder=descending&start=0&max_results=100')
 
     mock_response = mocker.Mock()
     mock_response.status_code = 200
     mock_response.text = '<fake_xml>Fake ArXiv response</fake_xml>'
     mock_rate_limited_get.return_value = mock_response
 
-    expected_parsed_result = [{'title': 'Attention Is All You Need', 'authors': ['Vaswani', 'Shazeer']}] * 5
+    expected_parsed_result = [{'title': 'Attention Is All You Need', 'authors': ['Vaswani', 'Shazeer'], 'pdf_link': 'http://arxiv.org/pdf/2407.0004'}] * 5
     mock_parse_arxiv_response.return_value = expected_parsed_result
 
     # Act
-    result = search_paper_by_title(title, limit, authors)
+    result = await search_paper_by_title(title, limit, authors)
 
     # Assert
-    mock_rate_limited_get.assert_called_once_with(expected_url)
+    mock_rate_limited_get.assert_awaited_once_with(mocker.ANY, expected_url)
     mock_parse_arxiv_response.assert_called_once_with(mock_response.text)
     assert result == expected_parsed_result[:limit]

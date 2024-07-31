@@ -9,52 +9,52 @@ def runner():
     return CliRunner()
 
 
-@pytest.fixture
-def mock_fetch(mocker):
-    return mocker.patch('arxiv_retriever.cli.fetch_papers')
-
-
-@pytest.fixture
-def mock_search(mocker):
-    return mocker.patch('arxiv_retriever.cli.search_paper_by_title')
-
-
-@pytest.fixture
-def mock_extract_paper_metadata(mocker):
-    return mocker.patch('arxiv_retriever.cli.extract_paper_metadata')
-
-
-def test_fetch_command_success(runner, mock_fetch, mock_extract_paper_metadata, mocker):
+@pytest.mark.asyncio
+async def test_fetch_command_success(runner, mocker):
+    mock_fetch = mocker.AsyncMock()
     mock_fetch.return_value = [
         {
             'title': 'Test Paper',
             'authors': ['John Doe'],
             'published': '2024-07-05T12:00:00Z',
-            'link': 'http://arxiv.org/abs/2407.0001',
+            'abstract_link': 'http://arxiv.org/abs/2407.0001',
+            'pdf_link': 'http://arxiv.org/pdf/2407.0001',
             'summary': 'Test paper summary.'
         }
     ]
-    mocker.patch('typer.confirm', return_value=False)  # mock the confirm to return False, i.e. no summarization
+    mocker.patch('arxiv_retriever.cli.fetch_papers', mock_fetch)
+
+    mock_process = mocker.AsyncMock()
+    mocker.patch('arxiv_retriever.cli.process_papers', mock_process)
+
     result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1", "--authors", "John Doe"])
+
     assert result.exit_code == 0
     assert "Fetching up to 1 papers from categories: cs.AI filtered by authors: John Doe" in result.stdout
     mock_fetch.assert_called_once_with(["cs.AI"], 1, ["John Doe"])
-    mock_extract_paper_metadata.assert_called_once_with(mock_fetch.return_value)
+    mock_process.assert_called_once()
 
 
-def test_search_command_success(runner, mock_search, mock_extract_paper_metadata, mocker):
+def test_search_command_success(runner, mocker):
+    mock_search = mocker.AsyncMock()
     mock_search.return_value = [
         {
             'title': 'Search Paper Title',
             'authors': ['John Doe'],
             'published': '2024-07-05T12:00:00Z',
-            'link': 'http://arxiv.org/abs/2407.0002',
+            'abstract_link': 'http://arxiv.org/abs/2407.0002',
+            'pdf_link': 'http://arxiv.org/pdf/2407.0002',
             'summary': 'Search paper summary.'
         }
     ]
-    mocker.patch('typer.confirm', return_value=False)  # mock the confirm to return False, i.e. no summarization
+    mocker.patch('arxiv_retriever.cli.search_paper_by_title', mock_search)
+    mock_process = mocker.AsyncMock()
+    mocker.patch('arxiv_retriever.cli.process_papers', mock_process)
+
     result = runner.invoke(app, ["search", "search paper title", "--limit", "1", "--authors", "John Doe"])
+
     assert result.exit_code == 0
+    assert "Searching for papers matching search paper title, filtered by authors: John Doe" in result.stdout
 
     # to create a more robust test based on output result, I will:
     # 1. split the test search query into a list
@@ -72,4 +72,17 @@ def test_search_command_success(runner, mock_search, mock_extract_paper_metadata
     assert any(comb.lower() in result.stdout.lower() for comb in title_combinations)  # main thing to check for
     assert "John Doe" in result.stdout
     mock_search.assert_called_once_with("search paper title", 1, ["John Doe"])
-    mock_extract_paper_metadata.assert_called_once_with(mock_search.return_value)
+    mock_process.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_download_command_success(runner, mocker):
+    mock_download_from_links = mocker.AsyncMock()
+    mocker.patch('arxiv_retriever.cli.download_from_links', mock_download_from_links)
+
+    result = runner.invoke(app, ["download", "http://arxiv.org/abs/2407.0001", "--download-dir", "./test_downloads"])
+
+    assert result.exit_code == 0
+    # assert "Downloading papers from links provided links..." in result.stdout
+    mock_download_from_links.assert_awaited_once_with(["http://arxiv.org/abs/2407.0001"], "./test_downloads")
+    assert "Download complete. Papers saved to ./test_downloads" in result.stdout
