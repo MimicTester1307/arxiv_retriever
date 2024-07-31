@@ -51,7 +51,7 @@ def search(
 
     try:
         async def run():
-            papers = search_paper_by_title(title, limit, authors)
+            papers = await search_paper_by_title(title, limit, authors)
             await process_papers(papers)
 
         trio.run(run)
