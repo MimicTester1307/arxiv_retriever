@@ -42,6 +42,7 @@ def search(
 ):
     """
     Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.
+
     :param title: Title of paper to search for
     :param limit: Total number of results to fetch
     :param authors: Optional list of author names to filter results by
