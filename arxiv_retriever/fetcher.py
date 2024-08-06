@@ -31,7 +31,7 @@ async def fetch_papers(categories: List[str], limit: int, authors: Optional[List
     max_results_per_query = 100
 
     category_query = '+OR+'.join(f'cat:{cat}' for cat in categories)
-    author_query = '+AND+(' + '+OR+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
+    author_query = '+AND+(' + '+AND+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
 
     async with httpx.AsyncClient() as client:
         while start < limit:
@@ -63,7 +63,7 @@ async def search_paper_by_title(title: str, limit: int, authors: Optional[List[s
     max_results_per_query = 100
 
     title_query = f'ti:"{encoded_title}"'
-    author_query = '+AND+(' + '+OR+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
+    author_query = '+AND+(' + '+AND+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
 
     async with httpx.AsyncClient() as client:
         while start < limit:
