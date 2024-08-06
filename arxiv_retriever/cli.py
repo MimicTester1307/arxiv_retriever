@@ -13,7 +13,8 @@ app = typer.Typer(no_args_is_help=True)
 @app.command()
 def fetch(categories: Annotated[List[str], typer.Argument(help="ArXiv categories to fetch papers from")],
           limit: int = typer.Option(10, help="Maximum number of papers to fetch"),
-          authors: Annotated[List[str], typer.Option(help="Author(s) to refine paper fetching by")] = None,
+          authors: Annotated[List[str], typer.Option("--author", "-a", help="Author(s) to refine paper fetching by. "
+                                                                            "Can be used multiple times.")] = None,
           ):
     """
     Fetch `limit` papers from ArXiv based on categories and optional authors.
@@ -38,7 +39,8 @@ def fetch(categories: Annotated[List[str], typer.Argument(help="ArXiv categories
 def search(
         title: Annotated[str, typer.Argument(help="ArXiv title to search for")],
         limit: int = typer.Option(10, help="Maximum number of papers to search"),
-        authors: Annotated[List[str], typer.Option(help="Author(s) to refine paper title search by")] = None,
+        authors: Annotated[List[str], typer.Option("--author", "-a", help="Author(s) to refine paper title search by. "
+                                                                          "Can be used multiple times.")] = None,
 ):
     """
     Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.
