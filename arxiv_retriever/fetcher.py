@@ -35,7 +35,7 @@ async def fetch_papers(categories: List[str], limit: int, authors: Optional[List
     category_query = '+OR+'.join(f'cat:{cat}' for cat in categories)
 
     if authors:
-        author_join = '+OR+' if author_logic.upper() == 'OR' else '+AND+'
+        author_join = '+AND+' if author_logic.upper() == 'AND' else '+OR+'
         author_query = '+AND+(' + author_join.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')'
     else:
         author_query = ''
@@ -73,7 +73,7 @@ async def search_paper_by_title(title: str, limit: int, authors: Optional[List[s
     title_query = f'ti:"{encoded_title}"'
 
     if authors:
-        author_join = '+OR+' if author_logic.upper() == 'OR' else '+AND+'
+        author_join = '+AND+' if author_logic.upper() == 'AND' else '+OR+'
         author_query = '+AND+(' + author_join.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')'
     else:
         author_query = ''

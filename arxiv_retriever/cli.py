@@ -18,8 +18,8 @@ def fetch(categories: Annotated[List[str], typer.Argument(help="ArXiv categories
           limit: int = typer.Option(10, help="Maximum number of papers to fetch"),
           authors: Annotated[List[str], typer.Option("--author", "-a", help="Author(s) to refine paper fetching by. "
                                                                             "Can be used multiple times.")] = None,
-          author_logic: str = typer.Option("AND", "--author-logic", "-l", help="Logic to use for multiple authors: "
-                                                                               "'AND' or 'OR'")
+          author_logic: str = typer.Option("OR", "--author-logic", "-l", help="Logic to use for multiple authors: "
+                                                                              "'AND' or 'OR'")
           ):
     """
     Fetch papers from ArXiv based on categories, refined by options.
@@ -27,13 +27,13 @@ def fetch(categories: Annotated[List[str], typer.Argument(help="ArXiv categories
     :param categories: List of ArXiv categories to search
     :param limit: Total number of results to fetch
     :param authors: Optional list of author names to filter results by
-    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'AND')
+    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'OR')
     :return: None
     """
     author_logic = author_logic.upper()
     if author_logic not in ['AND', 'OR']:
-        typer.echo(f"Invalid author_logic: {author_logic}. Using default 'AND' logic.")
-        author_logic = 'AND'
+        typer.echo(f"Invalid author_logic: {author_logic}. Using default 'OR' logic.")
+        author_logic = 'OR'
 
     typer.echo(f"Fetching up to {limit} papers from categories: {', '.join(categories)}")
     if authors:
@@ -59,8 +59,8 @@ def search(
         limit: int = typer.Option(10, help="Maximum number of papers to search"),
         authors: Annotated[List[str], typer.Option("--author", "-a", help="Author(s) to refine paper title search "
                                                                           "by. Can be used multiple times.")] = None,
-        author_logic: str = typer.Option("AND", "--author-logic", "-l", help="Logic to use for multiple authors: "
-                                                                             "'AND' or 'OR'")
+        author_logic: str = typer.Option("OR", "--author-logic", "-l", help="Logic to use for multiple authors: "
+                                                                            "'AND' or 'OR'")
 ):
     """
     Search for papers on ArXiv using title, refined by options.
@@ -68,13 +68,13 @@ def search(
     :param title: Title of paper to search for
     :param limit: Total number of results to fetch
     :param authors: Optional list of author names to filter results by
-    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'AND')
+    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'OR')
     :return: None
     """
     author_logic = author_logic.upper()
     if author_logic not in ['AND', 'OR']:
-        typer.echo(f"Invalid author_logic: {author_logic}. Using default 'AND' logic.")
-        author_logic = 'AND'
+        typer.echo(f"Invalid author_logic: {author_logic}. Using default 'OR' logic.")
+        author_logic = 'OR'
 
     typer.echo(f"Searching for papers matching {title}")
     if authors:
