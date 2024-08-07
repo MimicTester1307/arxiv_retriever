@@ -1,5 +1,3 @@
-import sys
-import inspect
 from itertools import combinations
 from collections import namedtuple
 import pytest
@@ -10,18 +8,6 @@ from arxiv_retriever.cli import app
 @pytest.fixture
 def runner():
     return CliRunner()
-
-
-@pytest.fixture(autouse=True)
-def mock_inspect_signature(mocker):
-    original_signature = inspect.signature
-
-    def patched_signature(func, *args, **kwargs):
-        if 'eval_str' in kwargs:
-            del kwargs['eval_str']
-        return original_signature(func, *args, **kwargs)
-
-    mocker.patch('inspect.signature', patched_signature)
 
 
 @pytest.mark.asyncio
@@ -104,20 +90,19 @@ async def test_download_command_success(runner, mocker):
     assert "Download complete. Papers saved to ./test_downloads" in result.stdout
 
 
-def test_version_command(runner, mocker, *args, **kwargs):
+def test_version_command(runner, mocker):
     mocker.patch('arxiv_retriever.cli.vsn', return_value="1.0.0")
+
+    # Mock sys.version_info
     VersionInfo = namedtuple('version_info', 'major minor micro releaselevel serial')
-    mock_version_info = VersionInfo(major=3, minor=8, micro=0, releaselevel='final', serial=0)
-    mocker.patch('sys.version_info', mock_version_info)
-    mocker.patch('typer.__version__', "1.0.0")
-    mocker.patch('httpx.__version__', "1.0.0")
-    mocker.patch('trio.__version__', "1.0.0")
+    mock_version_info = VersionInfo(major=3, minor=12, micro=0, releaselevel='final', serial=0)
+    mocker.patch('arxiv_retriever.cli.sys.version_info', mock_version_info)
 
     result = runner.invoke(app, ["version"])
 
-    assert result.exit_code == 0, f"Command failed with exit code {result.exit_code}. Output: {result.output}"
+    assert result.exit_code == 0
     assert "arxiv_retriever version: 1.0.0" in result.stdout
-    assert "Python version: 3." in result.stdout
+    assert "Python version: 3.12" in result.stdout
     assert "Typer version: 1.0.0" in result.stdout
     assert "Httpx version: 1.0.0" in result.stdout
     assert "Trio version: 1.0.0" in result.stdout
