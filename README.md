@@ -125,10 +125,10 @@ To view available commands: `axiv --help` or `axiv`
 
 ## Basic Commands
 
-- fetch: Fetch papers from ArXiv based on categories, refined by options.
-- search: Search for papers on ArXiv using title, refined by options.
-- download: Download papers from ArXiv using their links (PDF or abstract links).
-- version: Display version information for arxiv_retriever and core dependencies.
+- `fetch`: Fetch papers from ArXiv based on categories, refined by options.
+- `search`: Search for papers on ArXiv using title, refined by options.
+- `download`: Download papers from ArXiv using their links (PDF or abstract links).
+- `version`: Display version information for arxiv_retriever and core dependencies.
 
 ## Sample Usage
 
@@ -189,7 +189,7 @@ Download papers using links:
 
 - download using link to abstract:
     ```shell
-        axiv download https://arxiv.org/abs/2407.20214v1
+    axiv download https://arxiv.org/abs/2407.20214v1
     ```
 - download using link to pdf:
     ```shell
@@ -209,7 +209,7 @@ enhancements.
 
 ## Note on Testing
 
-Currently, 10 out of 11 tests pass, and even that required a bit of magic. Refactoring the tests for asynchrony was
+Currently, all 12 tests pass, and even that required a bit of magic. Refactoring the tests for asynchrony was
 an interesting challenge. Discussions and contributions regarding the asynchronous implementation are particularly
 welcome.
 
