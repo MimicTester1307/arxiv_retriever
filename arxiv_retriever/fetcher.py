@@ -95,6 +95,7 @@ async def search_paper_by_title(title: str, limit: int, authors: Optional[List[s
 def parse_arxiv_response(xml_data: str) -> List[Dict]:
     """
     Parse arXiv XML response and return paper information
+
     :param xml_data: XML response from arXiv API
     :return: List of dictionaries containing paper information
     """
@@ -121,6 +122,7 @@ def parse_arxiv_response(xml_data: str) -> List[Dict]:
 async def _download_paper(client: httpx.AsyncClient, paper: Dict, download_dir: str):
     """
     Download a paper and save it to the specified directory.
+
     :param client: httpx AsyncClient instance
     :param paper: Dictionary containing paper information
     :param download_dir: Directory to save downloaded papers
@@ -141,11 +143,14 @@ async def _download_paper(client: httpx.AsyncClient, paper: Dict, download_dir: 
         typer.echo(f"Downloaded {filename} to {filepath}")
     except httpx.HTTPStatusError as err:
         typer.echo(f"Failed to download '{paper['title']}': HTTP {err.response.status_code}")
+    except Exception as e:
+        typer.echo(f"An error occurred while downloading '{paper['title']}': {str(e)}")
 
 
 async def download_papers(papers: List[Dict], download_dir: str):
     """
     Download multiple papers asynchronously and save them to the specified directory.
+
     :param papers: List of dictionaries containing paper information
     :param download_dir: Directory to save downloaded papers
     :return: None

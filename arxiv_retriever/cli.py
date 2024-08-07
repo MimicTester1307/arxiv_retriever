@@ -1,4 +1,6 @@
 from typing import List
+
+import httpx
 from typing_extensions import Annotated
 
 import typer
@@ -37,13 +39,17 @@ def fetch(categories: Annotated[List[str], typer.Argument(help="ArXiv categories
         typer.echo(f"Filtered by authors: {', '.join(authors)} (using '{author_logic}' logic)...")
 
     try:
-        async def run():
-            papers = await fetch_papers(categories, limit, authors, author_logic)
-            await process_papers(papers)
-
-        trio.run(run)
+        papers = trio.run(fetch_papers, categories, limit, authors, author_logic)
+        trio.run(process_papers, papers)
+    except httpx.HTTPError as e:
+        typer.echo(f"HTTP error occurred: {str(e)}", err=True)
+    except trio.TooSlowError:
+        typer.echo(f"Operation timed out. please try again later.", err=True)
+    except KeyboardInterrupt:
+        typer.echo("Operation cancelled by user.", err=True)
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
+        raise
 
 
 @app.command()
@@ -74,13 +80,18 @@ def search(
         typer.echo(f"Filtered by authors: {', '.join(authors)} (using '{author_logic}' logic)...")
 
     try:
-        async def run():
-            papers = await search_paper_by_title(title, limit, authors, author_logic)
-            await process_papers(papers)
 
-        trio.run(run)
+        papers = trio.run(search_paper_by_title, title, limit, authors, author_logic)
+        trio.run(process_papers, papers)
+    except httpx.HTTPError as e:
+        typer.echo(f"HTTP error occurred: {str(e)}", err=True)
+    except trio.TooSlowError:
+        typer.echo(f"Operation timed out. please try again later.", err=True)
+    except KeyboardInterrupt:
+        typer.echo("Operation cancelled by user.", err=True)
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
+        raise
 
 
 @app.command()
@@ -100,8 +111,15 @@ def download(
     try:
         trio.run(download_from_links, links, download_dir)
         typer.echo(f"Download complete. Papers saved to {download_dir}")
+    except httpx.HTTPError as e:
+        typer.echo(f"HTTP error occurred: {str(e)}", err=True)
+    except trio.TooSlowError:
+        typer.echo(f"Operation timed out. please try again later.", err=True)
+    except KeyboardInterrupt:
+        typer.echo("Operation cancelled by user.", err=True)
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
+        raise
 
 
 def main():
