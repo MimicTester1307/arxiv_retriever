@@ -17,7 +17,7 @@ async def rate_limited_get(client: httpx.AsyncClient, url: str) -> httpx.Respons
     return response
 
 
-async def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]] = None, author_logic: str = 'AND') -> List[Dict]:
+async def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]] = None, author_logic: str = 'OR') -> List[Dict]:
     """
     Fetch papers from ArXiv using given categories and limit, with optional author filter.
 
@@ -54,7 +54,7 @@ async def fetch_papers(categories: List[str], limit: int, authors: Optional[List
     return papers[:limit]  # Trim to the requested number of results
 
 
-async def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] = None, author_logic: str = 'AND') -> List[Dict]:
+async def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] = None, author_logic: str = 'OR') -> List[Dict]:
     """
     Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.
 

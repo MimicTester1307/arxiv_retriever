@@ -1,4 +1,5 @@
 from itertools import combinations
+from collections import namedtuple
 import pytest
 from typer.testing import CliRunner
 from arxiv_retriever.cli import app
@@ -27,15 +28,17 @@ async def test_fetch_command_success(runner, mocker):
     mock_process = mocker.AsyncMock()
     mocker.patch('arxiv_retriever.cli.process_papers', mock_process)
 
-    result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1", "--authors", "John Doe"])
+    result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1", "--author", "John Doe"])
 
     assert result.exit_code == 0
-    assert "Fetching up to 1 papers from categories: cs.AI filtered by authors: John Doe" in result.stdout
-    mock_fetch.assert_called_once_with(["cs.AI"], 1, ["John Doe"])
+    assert "Fetching up to 1 papers from categories: cs.AI" in result.stdout
+    assert "Filtered by authors: John Doe (using 'OR' logic)..." in result.stdout
+    mock_fetch.assert_called_once_with(["cs.AI"], 1, ["John Doe"], "OR")
     mock_process.assert_called_once()
 
 
-def test_search_command_success(runner, mocker):
+@pytest.mark.asyncio
+async def test_search_command_success(runner, mocker):
     mock_search = mocker.AsyncMock()
     mock_search.return_value = [
         {
@@ -51,11 +54,9 @@ def test_search_command_success(runner, mocker):
     mock_process = mocker.AsyncMock()
     mocker.patch('arxiv_retriever.cli.process_papers', mock_process)
 
-    result = runner.invoke(app, ["search", "search paper title", "--limit", "1", "--authors", "John Doe"])
+    result = runner.invoke(app, ["search", "search paper title", "--limit", "1", "--author", "John Doe"])
 
     assert result.exit_code == 0
-    assert "Searching for papers matching search paper title, filtered by authors: John Doe" in result.stdout
-
     # to create a more robust test based on output result, I will:
     # 1. split the test search query into a list
     # 2. create another list of all the possible combinations of the search query
@@ -70,19 +71,38 @@ def test_search_command_success(runner, mocker):
                           combinations(search_title_list, i)]  # initial implementation was from beginning; realized
     # searching for combinations in reverse is best case
     assert any(comb.lower() in result.stdout.lower() for comb in title_combinations)  # main thing to check for
-    assert "John Doe" in result.stdout
-    mock_search.assert_called_once_with("search paper title", 1, ["John Doe"])
+    assert "Searching for papers matching search paper title" in result.stdout
+    assert "Filtered by authors: John Doe (using 'OR' logic)..." in result.stdout
+    mock_search.assert_called_once_with("search paper title", 1, ["John Doe"], "OR")
     mock_process.assert_called_once()
 
 
-# @pytest.mark.asyncio
-# async def test_download_command_success(runner, mocker):
-#     mock_download_from_links = mocker.AsyncMock()
-#     mocker.patch('arxiv_retriever.cli.download_from_links', mock_download_from_links)
-#
-#     result = runner.invoke(app, ["download", "http://arxiv.org/abs/2407.0001", "--download-dir", "./test_downloads"])
-#
-#     assert result.exit_code == 0
-#     # assert "Downloading papers from links provided links..." in result.stdout
-#     mock_download_from_links.assert_awaited_once_with(["http://arxiv.org/abs/2407.0001"], "./test_downloads")
-#     assert "Download complete. Papers saved to ./test_downloads" in result.stdout
+@pytest.mark.asyncio
+async def test_download_command_success(runner, mocker):
+    mock_download_from_links = mocker.AsyncMock()
+    mocker.patch('arxiv_retriever.cli.download_from_links', mock_download_from_links)
+
+    result = runner.invoke(app, ["download", "http://arxiv.org/abs/2407.0001", "--download-dir", "./test_downloads"])
+
+    assert result.exit_code == 0
+    # assert "Downloading papers from links provided links..." in result.stdout
+    mock_download_from_links.assert_awaited_once_with(["http://arxiv.org/abs/2407.0001"], "./test_downloads")
+    assert "Download complete. Papers saved to ./test_downloads" in result.stdout
+
+
+def test_version_command(runner, mocker):
+    mocker.patch('arxiv_retriever.cli.vsn', return_value="1.0.0")
+
+    # Mock sys.version_info
+    VersionInfo = namedtuple('version_info', 'major minor micro releaselevel serial')
+    mock_version_info = VersionInfo(major=3, minor=12, micro=0, releaselevel='final', serial=0)
+    mocker.patch('arxiv_retriever.cli.sys.version_info', mock_version_info)
+
+    result = runner.invoke(app, ["version"])
+
+    assert result.exit_code == 0
+    assert "arxiv_retriever version: 1.0.0" in result.stdout
+    assert "Python version: 3.12" in result.stdout
+    assert "Typer version: 1.0.0" in result.stdout
+    assert "Httpx version: 1.0.0" in result.stdout
+    assert "Trio version: 1.0.0" in result.stdout

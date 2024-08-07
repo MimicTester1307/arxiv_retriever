@@ -25,7 +25,6 @@ def test_extract_paper_metadata_output(runner, mocker):
     result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1"])
 
     assert result.exit_code == 0
-    assert "Fetching up to 1 papers from categories: cs.AI filtered by authors: " in result.stdout
     assert "1. Test Paper" in result.stdout
     assert "Authors: John Doe" in result.stdout
     assert "Published: 2024-07-05T12:00:00Z" in result.stdout
@@ -60,9 +59,9 @@ async def test_process_papers(runner, mocker):
     result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1"])
 
     assert result.exit_code == 0
-    mock_fetch.assert_awaited_once_with(['cs.AI'], 1, None)
+    mock_fetch.assert_awaited_once_with(['cs.AI'], 1, None, 'OR')
     mock_summarize.assert_called_once()
-    mock_download.awaited_called_once()
+    mock_download.assert_awaited_once()
 
 
 @pytest.mark.asyncio
@@ -89,6 +88,6 @@ async def test_process_papers_no_download(runner, mocker):
     result = runner.invoke(app, ["fetch", "cs.AI", "--limit", "1"])
 
     assert result.exit_code == 0
-    mock_fetch.assert_awaited_once_with(['cs.AI'], 1, None)
+    mock_fetch.assert_awaited_once_with(['cs.AI'], 1, None, 'OR')
     mock_summarize.assert_called_once()
     mock_download.assert_not_called()

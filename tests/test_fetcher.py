@@ -87,8 +87,9 @@ async def test_fetch_papers_with_authors(mocker):
     categories = ['cs.AI']
     limit = 5
     authors = ['John Doe', 'Jane Smith']
+    author_logic = 'AND'
     expected_url = ('http://export.arxiv.org/api/query?search_query=cat:cs.AI+AND+('
-                    'au:"John+Doe"+OR+au:"Jane+Smith")&sortBy=submittedDate&sortOrder=descending&start=0&max_results'
+                    'au:"John+Doe"+AND+au:"Jane+Smith")&sortBy=submittedDate&sortOrder=descending&start=0&max_results'
                     '=100')
     mock_response = mocker.Mock()
     mock_response.status_code = 200
@@ -99,7 +100,7 @@ async def test_fetch_papers_with_authors(mocker):
     mock_parse_arxiv_response.return_value = expected_parsed_result
 
     # Act
-    result = await fetch_papers(categories, limit, authors)
+    result = await fetch_papers(categories, limit, authors, author_logic)
 
     # Assert
     mock_rate_limited_get.assert_awaited_once_with(mocker.ANY, expected_url)
@@ -150,8 +151,9 @@ async def test_search_paper_by_title_with_authors(mocker):
     title = "Attention Is All You Need"
     limit = 5
     authors = ['Vaswani', 'Shazeer']
+    author_logic = 'AND'
     expected_url = (f'http://export.arxiv.org/api/query?search_query=ti:"Attention+Is+All+You+Need"+AND+('
-                    f'au:"Vaswani"+OR+au:"Shazeer")&sortBy=relevance&sortOrder=descending&start=0&max_results=100')
+                    f'au:"Vaswani"+AND+au:"Shazeer")&sortBy=relevance&sortOrder=descending&start=0&max_results=100')
 
     mock_response = mocker.Mock()
     mock_response.status_code = 200
@@ -162,7 +164,7 @@ async def test_search_paper_by_title_with_authors(mocker):
     mock_parse_arxiv_response.return_value = expected_parsed_result
 
     # Act
-    result = await search_paper_by_title(title, limit, authors)
+    result = await search_paper_by_title(title, limit, authors, author_logic)
 
     # Assert
     mock_rate_limited_get.assert_awaited_once_with(mocker.ANY, expected_url)
