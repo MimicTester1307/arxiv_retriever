@@ -3,6 +3,7 @@ from typing import List, Dict, Optional
 import xml.etree.ElementTree as ET  # TODO: explore way to parse XML data more securely
 import urllib.parse
 
+import typer
 import trio
 import httpx
 
@@ -16,13 +17,14 @@ async def rate_limited_get(client: httpx.AsyncClient, url: str) -> httpx.Respons
     return response
 
 
-async def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]] = None) -> List[Dict]:
+async def fetch_papers(categories: List[str], limit: int, authors: Optional[List[str]] = None, author_logic: str = 'AND') -> List[Dict]:
     """
     Fetch papers from ArXiv using given categories and limit, with optional author filter.
 
     :param categories: List of ArXiv categories to search
     :param limit: Total number of results to fetch
     :param authors: Optional list of author names to filter results by
+    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'AND')
     :return: List of dictionaries containing paper information
     """
     base_url = "http://export.arxiv.org/api/query?"
@@ -31,7 +33,12 @@ async def fetch_papers(categories: List[str], limit: int, authors: Optional[List
     max_results_per_query = 100
 
     category_query = '+OR+'.join(f'cat:{cat}' for cat in categories)
-    author_query = '+AND+(' + '+AND+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
+
+    if authors:
+        author_join = '+OR+' if author_logic.upper() == 'OR' else '+AND+'
+        author_query = '+AND+(' + author_join.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')'
+    else:
+        author_query = ''
 
     async with httpx.AsyncClient() as client:
         while start < limit:
@@ -47,13 +54,14 @@ async def fetch_papers(categories: List[str], limit: int, authors: Optional[List
     return papers[:limit]  # Trim to the requested number of results
 
 
-async def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] = None) -> List[Dict]:
+async def search_paper_by_title(title: str, limit: int, authors: Optional[List[str]] = None, author_logic: str = 'AND') -> List[Dict]:
     """
     Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.
 
     :param title: Title of paper to search for
     :param limit: Total number of results to fetch
     :param authors: Optional list of author names to filter results by
+    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'AND')
     :return: List of dictionaries containing paper information
     """
     base_url = "http://export.arxiv.org/api/query?"
@@ -63,7 +71,12 @@ async def search_paper_by_title(title: str, limit: int, authors: Optional[List[s
     max_results_per_query = 100
 
     title_query = f'ti:"{encoded_title}"'
-    author_query = '+AND+(' + '+AND+'.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')' if authors else ''
+
+    if authors:
+        author_join = '+OR+' if author_logic.upper() == 'OR' else '+AND+'
+        author_query = '+AND+(' + author_join.join(f'au:"{urllib.parse.quote_plus(author)}"' for author in authors) + ')'
+    else:
+        author_query = ''
 
     async with httpx.AsyncClient() as client:
         while start < limit:
@@ -114,7 +127,7 @@ async def _download_paper(client: httpx.AsyncClient, paper: Dict, download_dir: 
     :return: None
     """
     if not paper['pdf_link']:
-        print(f"No PDF link for paper {paper['title']}")
+        typer.echo(f"No PDF link for paper {paper['title']}")
         return
 
     filename = f"{paper['title'].replace(' ', '_')[:20]}.pdf"
@@ -125,9 +138,9 @@ async def _download_paper(client: httpx.AsyncClient, paper: Dict, download_dir: 
         response.raise_for_status()
         with open(filepath, 'wb') as file:
             file.write(response.content)
-        print(f"Downloaded {filename} to {filepath}")
+        typer.echo(f"Downloaded {filename} to {filepath}")
     except httpx.HTTPStatusError as err:
-        print(f"Failed to download '{paper['title']}': HTTP {err.response.status_code}")
+        typer.echo(f"Failed to download '{paper['title']}': HTTP {err.response.status_code}")
 
 
 async def download_papers(papers: List[Dict], download_dir: str):
@@ -168,9 +181,9 @@ async def _download_single_paper_from_link(client: httpx.AsyncClient, link: str,
         response.raise_for_status()
         with open(filepath, 'wb') as file:
             file.write(response.content)
-        print(f"Downloaded {filename} to {filepath}")
+        typer.echo(f"Downloaded {filename} to {filepath}")
     except httpx.HTTPStatusError as err:
-        print(f"Failed to download '{pdf_link}': HTTP {err.response.status_code}")
+        typer.echo(f"Failed to download '{pdf_link}': HTTP {err.response.status_code}")
 
 
 async def download_from_links(links: List[str], download_dir: str):

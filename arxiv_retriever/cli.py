@@ -15,19 +15,30 @@ def fetch(categories: Annotated[List[str], typer.Argument(help="ArXiv categories
           limit: int = typer.Option(10, help="Maximum number of papers to fetch"),
           authors: Annotated[List[str], typer.Option("--author", "-a", help="Author(s) to refine paper fetching by. "
                                                                             "Can be used multiple times.")] = None,
+          author_logic: str = typer.Option("AND", "--author-logic", "-l", help="Logic to use for multiple authors: "
+                                                                               "'AND' or 'OR'")
           ):
     """
-    Fetch `limit` papers from ArXiv based on categories and optional authors.
+    Fetch papers from ArXiv based on categories, refined by options.
 
     :param categories: List of ArXiv categories to search
     :param limit: Total number of results to fetch
     :param authors: Optional list of author names to filter results by
+    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'AND')
     :return: None
     """
-    typer.echo(f"Fetching up to {limit} papers from categories: {', '.join(categories)} filtered by authors: {', '.join(authors) if authors else ''}...")
+    author_logic = author_logic.upper()
+    if author_logic not in ['AND', 'OR']:
+        typer.echo(f"Invalid author_logic: {author_logic}. Using default 'AND' logic.")
+        author_logic = 'AND'
+
+    typer.echo(f"Fetching up to {limit} papers from categories: {', '.join(categories)}")
+    if authors:
+        typer.echo(f"Filtered by authors: {', '.join(authors)} (using '{author_logic}' logic)...")
+
     try:
         async def run():
-            papers = await fetch_papers(categories, limit, authors)
+            papers = await fetch_papers(categories, limit, authors, author_logic)
             await process_papers(papers)
 
         trio.run(run)
@@ -39,22 +50,32 @@ def fetch(categories: Annotated[List[str], typer.Argument(help="ArXiv categories
 def search(
         title: Annotated[str, typer.Argument(help="ArXiv title to search for")],
         limit: int = typer.Option(10, help="Maximum number of papers to search"),
-        authors: Annotated[List[str], typer.Option("--author", "-a", help="Author(s) to refine paper title search by. "
-                                                                          "Can be used multiple times.")] = None,
+        authors: Annotated[List[str], typer.Option("--author", "-a", help="Author(s) to refine paper title search "
+                                                                          "by. Can be used multiple times.")] = None,
+        author_logic: str = typer.Option("AND", "--author-logic", "-l", help="Logic to use for multiple authors: "
+                                                                             "'AND' or 'OR'")
 ):
     """
-    Search for papers on ArXiv using title, optionally filtered by author and return `limit` papers.
+    Search for papers on ArXiv using title, refined by options.
 
     :param title: Title of paper to search for
     :param limit: Total number of results to fetch
     :param authors: Optional list of author names to filter results by
+    :param author_logic: Logic to use for multiple authors ('AND' or 'OR', default is 'AND')
     :return: None
     """
-    typer.echo(f"Searching for papers matching {title}, filtered by authors: {', '.join(authors) if authors else ''}...")
+    author_logic = author_logic.upper()
+    if author_logic not in ['AND', 'OR']:
+        typer.echo(f"Invalid author_logic: {author_logic}. Using default 'AND' logic.")
+        author_logic = 'AND'
+
+    typer.echo(f"Searching for papers matching {title}")
+    if authors:
+        typer.echo(f"Filtered by authors: {', '.join(authors)} (using '{author_logic}' logic)...")
 
     try:
         async def run():
-            papers = await search_paper_by_title(title, limit, authors)
+            papers = await search_paper_by_title(title, limit, authors, author_logic)
             await process_papers(papers)
 
         trio.run(run)
