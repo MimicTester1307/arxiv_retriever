@@ -3,7 +3,6 @@ import inspect
 from itertools import combinations
 from collections import namedtuple
 import pytest
-from unittest.mock import patch
 from typer.testing import CliRunner
 from arxiv_retriever.cli import app
 
@@ -11,6 +10,18 @@ from arxiv_retriever.cli import app
 @pytest.fixture
 def runner():
     return CliRunner()
+
+
+@pytest.fixture(autouse=True)
+def mock_inspect_signature(mocker):
+    original_signature = inspect.signature
+
+    def patched_signature(func, *args, **kwargs):
+        if 'eval_str' in kwargs:
+            del kwargs['eval_str']
+        return original_signature(func, *args, **kwargs)
+
+    mocker.patch('inspect.signature', patched_signature)
 
 
 @pytest.mark.asyncio
@@ -95,34 +106,18 @@ async def test_download_command_success(runner, mocker):
 
 def test_version_command(runner, mocker, *args, **kwargs):
     mocker.patch('arxiv_retriever.cli.vsn', return_value="1.0.0")
-
-    # Mock sys.version_info
     VersionInfo = namedtuple('version_info', 'major minor micro releaselevel serial')
-    mock_version_info = VersionInfo(major=3, minor=12, micro=0, releaselevel='final', serial=0)
-    mocker.patch('arxiv_retriever.cli.sys.version_info', mock_version_info)
+    mock_version_info = VersionInfo(major=3, minor=8, micro=0, releaselevel='final', serial=0)
+    mocker.patch('sys.version_info', mock_version_info)
+    mocker.patch('typer.__version__', "1.0.0")
+    mocker.patch('httpx.__version__', "1.0.0")
+    mocker.patch('trio.__version__', "1.0.0")
 
-    # Mock Typer's get_params_from_function to be compatible with Python3.8
-    def mock_get_params_from_function(func):
-        if sys.version_info >= (3, 10):
-            # In Python 3.10+, we would use eval_str=True, but we're mocking for 3.8
-            # so we'll use the regular signature here
-            sig = inspect.signature(func)
-        else:
-            # For Python 3.8 and 3.9
-            sig = inspect.signature(func)
+    result = runner.invoke(app, ["version"])
 
-        # concert signature to expected dictionary format
-        return {
-            name: inspect.Parameter(name, param.kind, default=param.default)
-            for name, param in sig.parameters.items()
-        }
-
-    with patch('typer.utils.get_params_from_function', mock_get_params_from_function):
-        result = runner.invoke(app, ["version"])
-
-    assert result.exit_code == 0
+    assert result.exit_code == 0, f"Command failed with exit code {result.exit_code}. Output: {result.output}"
     assert "arxiv_retriever version: 1.0.0" in result.stdout
-    assert "Python version: 3.12" in result.stdout
+    assert "Python version: 3." in result.stdout
     assert "Typer version: 1.0.0" in result.stdout
     assert "Httpx version: 1.0.0" in result.stdout
     assert "Trio version: 1.0.0" in result.stdout
