@@ -1,5 +1,6 @@
 from typing import List
 import sys
+import os
 from importlib.metadata import version as vsn
 from typing_extensions import Annotated
 
@@ -98,7 +99,7 @@ def search(
 @app.command()
 def download(
         links: Annotated[List[str], typer.Argument(help="ArXiv links to download")],
-        download_dir: str = typer.Option("./axiv_downloads", help="Directory to download papers"),
+        download_dir: str = typer.Option("./arxiv_downloads", "--download-dir", "-d", help="Directory to download papers"),
 ):
     """
     Download papers from ArXiv using their links (PDF or abstract links).
@@ -107,8 +108,10 @@ def download(
     :param download_dir: Directory to download papers
     :return: None
     """
-    typer.echo(f"Downloading papers from provided links...")
+    download_dir = typer.prompt(f"Enter download directory: ", default=download_dir)
+    download_dir = os.path.expanduser(download_dir)  # expand user directory if used
 
+    typer.echo(f"Downloading papers from provided links...")
     try:
         trio.run(download_from_links, links, download_dir)
         typer.echo(f"Download complete. Papers saved to {download_dir}")
