@@ -1,8 +1,9 @@
 from typing import List
-
-import httpx
+import sys
+from importlib.metadata import version as vsn
 from typing_extensions import Annotated
 
+import httpx
 import typer
 import trio
 
@@ -120,6 +121,22 @@ def download(
     except Exception as e:
         typer.echo(f"An error occurred: {str(e)}", err=True)
         raise
+
+
+@app.command()
+def version():
+    """
+    Display version information for arxiv_retriever and core dependencies.
+
+    :return: None
+    """
+    arxiv_retriever_version = vsn("arxiv_retriever")
+    typer.echo(f"arxiv_retriever version: {arxiv_retriever_version}\n")
+    typer.echo(f"--[Core Dependencies]--")
+    typer.echo(f"Python version: {sys.version_info.major}.{sys.version_info.minor}")
+    typer.echo(f"Typer version: {vsn('typer')}")
+    typer.echo(f"Httpx version: {vsn('httpx')}")
+    typer.echo(f"Trio version: {vsn('trio')}")
 
 
 def main():
