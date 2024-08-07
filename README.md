@@ -16,11 +16,12 @@ Although my current focus while building `arxiv_retriever` is the computer scien
 used with categories from other areas on arxiv, e.g., `math.CO`.
 
 # Features
-- Fetches the most recent papers from ArXiv by specified categories
+- Fetch the most recent papers specified ArXiv categories
 - Search for papers on ArXiv using full or partial title
-- Refine fetch and search by author for more precise results
+- Refine fetch and search by author (s) for more precise results
+- Specify logic for combination of multiple authors ('AND' or 'OR') during retrieval
+- Download papers after they are retrieved
 - View paper details including title, authors, abstract, publication date, and links to paper's abstract and pdf pages
-- Download papers after they are retrieved using `fetch` or `search`, or directly using `download`
 - Easy-to-use command-line interface built with Typer
 - Configurable number of results to fetch
 - Built using only the standard library and tried and tested packages.
@@ -120,46 +121,39 @@ To install the latest development version from source:
 
 After installation, use the package via the `axiv` command:
 
-To view available commands:
-```shell
-axiv --help
-```
+To view available commands: `axiv --help` or `axiv`
 
-To view arguments and options for available commands:
-```shell
-axiv <command> --help
-```
+## Basic Commands
+
+- fetch: Fetch papers from ArXiv based on categories, refined by options.
+- search: Search for papers on ArXiv using title, refined by options.
+- download: Download papers from ArXiv using their links (PDF or abstract links).
+- version: Display version information for arxiv_retriever and core dependencies.
 
 ## Sample Usage
 
+### Fetch
 To retrieve the most recent computer science papers by categories, use the `fetch` command followed by the categories and 
 options:
-   ```shell
-   axiv fetch <categories> [--limit]
-   ```
-*Outputs `limit` papers sorted by `submittedDate` in descending order*
-
-To filter results by author(s):
 ```shell
-  axiv fetch <categories> [--limit] [--authors]
+axiv fetch [OPTIONS] CATEGORIES...
 ```
-*Outputs `limit` papers sorted by `submittedDate` in descending order, filtered by `authors`*
 
-To retrieve `limit` papers matching a specified title, use the `search` command followed by a title and options:
-   ```shell
-   axiv search <title> [--limit]
-   ```
-*Outputs `limit` papers sorted by `relevance` in descending order*
-
-To filter results by author(s):
-```shell
-  axiv search <title> [--limit] [--authors]
+### Search
+To search for a paper by title, use the `search` command followed by the title and options:
+```shell 
+axiv search [OPTIONS] TITLE
 ```
-*Outputs `limit` papers sorted by `relevance` in descending order, filtered by authors*
+
+### CLI Options
+Due to how most CLI frameworks (including Typer) handle arguments vs options, if you want to specify multiple options (in this case, authors)
+to refine your `search` or `fetch` command by, you will have to call the option multiple times. That is,
+`--author <author> --author <author>` as opposed to `--author <author> <author>`. Alternatively, you can use `-a` rather
+than `--author`
 
 ### Downloading your research papers
 There are multiple ways to download your research paper using `axiv`:
-- use `axiv download <link> [--download_dir]` to download the paper directly from the link
+- use `axiv download [OPTIONS] LINKS...` to download the paper directly from the link
 - confirm if you want to download the retrieved papers using `fetch` or `search` when asked by the CLI
 
 With option 1, the file is named using the URL's basename, e.g. `2407.09298v1.pdf`.
@@ -170,15 +164,26 @@ With options 2, the file is named using the title retrieved from the XML data wh
 
 
 ## Examples
-Fetch the latest 5 papers in the cs.AI and cs.GL categories:
-   ```shell
-   axiv fetch cs.AI cs.GL --limit 5
-   ```
+Fetch the latest 5 papers in the cs.AI OR cs.GL categories:
+```shell
+axiv fetch cs.AI cs.GL --limit 5
+```
+*Outputs `limit` papers sorted by `submittedDate` in descending order, filtered by `authors`*
+
+Refine fetch using multiple authors
+```shell
+axiv fetch cs.AI -a omar -a matei
+```
+
+Add logic for creating query when multiple authors are supplied using `--author-logic` or `-l`:
+```shell
+axiv fetch cs.AI math.CO -a "John Doe" -a "Jane Smith" --author-logic AND
+```
 
 Fetch papers matching the title, "Attention is all you need", refined by author "Ashish":
-   ```shell
-   axiv search "Attention is all you need" --limit 5 --authors "Ashish"
-   ```
+```shell
+axiv search "Attention is all you need" --limit 5 --author "Ashish"
+```
 
 Download papers using links:
 
