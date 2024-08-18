@@ -1,7 +1,7 @@
 annotated-types==0.7.0
 anyio==4.4.0
 arxiv_retriever @ file:///Users/excelchukwu/PycharmProjects/arxiv_retriever/dist/arxiv_retriever-1.0.0-py3-none-any.whl#sha256=1872f9c59f40c6ccbaef4f6acdb17abc4da16e63a7d6c3106e30dbf9daccca29
-attrs==23.2.0
+attrs==24.2.0
 certifi==2024.7.4
 charset-normalizer==3.3.2
 click==8.1.7
