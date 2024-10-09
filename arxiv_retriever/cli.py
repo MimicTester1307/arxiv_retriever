@@ -135,7 +135,7 @@ def version():
     """
     arxiv_retriever_version = vsn("arxiv_retriever")
     typer.echo(f"arxiv_retriever version: {arxiv_retriever_version}\n")
-    typer.echo(f"--[Core Dependencies]--")
+    typer.echo(f"[Core Dependencies]")
     typer.echo(f"Python version: {sys.version_info.major}.{sys.version_info.minor}")
     typer.echo(f"Typer version: {vsn('typer')}")
     typer.echo(f"Httpx version: {vsn('httpx')}")
