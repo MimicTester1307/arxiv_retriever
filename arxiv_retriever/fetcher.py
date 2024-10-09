@@ -12,8 +12,8 @@ WAIT_TIME = 3  # number of seconds to wait between calls
 
 async def rate_limited_get(client: httpx.AsyncClient, url: str) -> httpx.Response:
     """Make an asynchronous GET request with rate limiting."""
-    response = await client.get(url)
     await trio.sleep(WAIT_TIME)
+    response = await client.get(url)
     return response
 
 
